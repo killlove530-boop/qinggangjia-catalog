@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美耐板材質圖鑑</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232635;
+    --border: #2e3147;
+    --accent: #4f8ef7;
+    --accent2: #7dd3b0;
+    --accent3: #f7c94f;
+    --accent4: #f77f6b;
+    --text: #e8eaf0;
+    --text-muted: #8b90a8;
+    --text-dim: #5a5f7a;
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.45);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(15,17,23,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 32px; flex-wrap: wrap;
+  }
+  .nav-dot {
+    padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
+    cursor: pointer; color: var(--text-muted); border: 1px solid transparent;
+    transition: all .2s;
+  }
+  .nav-dot:hover { color: var(--text); background: var(--surface2); }
+  .nav-dot.active { color: #fff; background: var(--accent); border-color: var(--accent); }
+  .nav-title {
+    margin-right: auto; font-size: 15px; font-weight: 700; color: var(--accent);
+    letter-spacing: .5px;
+  }
+
+  /* ── SLIDES ── */
+  .slide {
+    min-height: 100vh; padding: 100px 48px 60px;
+    display: none; flex-direction: column;
+    max-width: 1100px; margin: 0 auto;
+    animation: fadeSlide .35s ease;
+  }
+  .slide.active { display: flex; }
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── HERO SLIDE ── */
+  .hero-slide {
+    align-items: center; justify-content: center; text-align: center;
+    background: radial-gradient(ellipse 70% 50% at 50% 60%, #1c3250 0%, transparent 70%);
+  }
+  .hero-tag {
+    display: inline-block; background: var(--accent); color: #fff;
+    padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 20px;
+  }
+  .hero-title {
+    font-size: clamp(42px, 7vw, 80px); font-weight: 800; line-height: 1.1;
+    letter-spacing: -1px; margin-bottom: 20px;
+    background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero-sub {
+    font-size: 18px; color: var(--text-muted); margin-bottom: 48px;
+    max-width: 560px; line-height: 1.7;
+  }
+  .hero-chips { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .chip {
+    padding: 8px 20px; border: 1.5px solid var(--border);
+    border-radius: 24px; font-size: 14px; color: var(--text-muted);
+    background: var(--surface);
+  }
+
+  /* ── SECTION HEADER ── */
+  .slide-header { margin-bottom: 36px; }
+  .slide-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+  }
+  .slide-title {
+    font-size: clamp(28px, 4vw, 44px); font-weight: 800; line-height: 1.15;
+    letter-spacing: -.5px;
+  }
+  .slide-title span { color: var(--accent); }
+  .slide-desc { margin-top: 10px; color: var(--text-muted); font-size: 15px; line-height: 1.7; }
+
+  /* ── COLOR SWATCHES ── */
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px; margin-top: 4px;
+  }
+  .color-swatch {
+    border-radius: var(--radius); overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    cursor: pointer; transition: transform .2s, box-shadow .2s;
+  }
+  .color-swatch:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .swatch-color {
+    width: 100%; height: 120px;
+    border-bottom: 1px solid var(--border);
+  }
+  .swatch-label {
+    background: var(--surface); padding: 12px;
+    font-size: 12.5px; font-weight: 600; color: var(--text);
+    line-height: 1.4;
+  }
+  .swatch-desc {
+    background: var(--surface); padding: 0 12px 8px;
+    font-size: 11px; color: var(--text-dim);
+  }
+
+  /* ── CARD GRID ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px; margin-top: 4px;
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 22px 24px;
+    transition: border-color .2s, transform .2s, box-shadow .2s;
+    position: relative; overflow: hidden;
+  }
+  .card:hover {
+    border-color: var(--accent); transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(79,142,247,.18);
+  }
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--card-color, var(--accent));
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .card-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .card-sub { font-size: 12px; color: var(--accent2); font-weight: 600;
+    margin-bottom: 8px; letter-spacing: .5px; }
+  .card-body { font-size: 13.5px; color: var(--text-muted); line-height: 1.65; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .tag {
+    padding: 3px 9px; border-radius: 10px; font-size: 11.5px; font-weight: 600;
+    background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border);
+  }
+  .tag.green { background: #0d2b20; color: var(--accent2); border-color: #1a4a35; }
+  .tag.blue  { background: #0d1e38; color: var(--accent);  border-color: #1a3460; }
+  .tag.gold  { background: #2b230d; color: var(--accent3); border-color: #4a3a1a; }
+  .tag.red   { background: #2b140d; color: var(--accent4); border-color: #4a2318; }
+
+  /* ── SPEC TABLE ── */
+  .spec-table {
+    width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13.5px;
+  }
+  .spec-table th {
+    background: var(--surface2); color: var(--text-muted);
+    font-weight: 600; font-size: 12px; letter-spacing: .5px;
+    padding: 10px 14px; text-align: left; border-bottom: 2px solid var(--border);
+  }
+  .spec-table td {
+    padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text);
+    vertical-align: top;
+  }
+  .spec-table tr:hover td { background: var(--surface2); }
+  .spec-table tr:last-child td { border-bottom: none; }
+  .highlight { color: var(--accent3); font-weight: 600; }
+  .good { color: var(--accent2); }
+  .warn { color: var(--accent4); }
+
+  /* ── SECTION BOX ── */
+  .section-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+    margin-top: 4px;
+  }
+  .section-box-title {
+    font-size: 14px; font-weight: 700; color: var(--accent);
+    margin-bottom: 16px; letter-spacing: .3px;
+  }
+
+  /* ── LIST ── */
+  .check-list { list-style: none; }
+  .check-list li {
+    padding: 7px 0; border-bottom: 1px solid var(--border);
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 13.5px; color: var(--text-muted); line-height: 1.5;
+  }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before { content: '▸'; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+
+  /* ── BTN NAV ── */
+  .btn-nav {
+    display: flex; justify-content: flex-end; gap: 12px;
+    margin-top: auto; padding-top: 32px;
+  }
+  .btn {
+    padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none; transition: all .2s;
+  }
+  .btn-ghost {
+    background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--text-dim); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #6fa2ff; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  @media (max-width: 700px) {
+    .slide { padding: 90px 20px 40px; }
+    nav { padding: 10px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-title">美耐板材質圖鑑</span>
+  <span class="nav-dot active" onclick="goTo(0)">封面</span>
+  <span class="nav-dot" onclick="goTo(1)">材料介紹</span>
+  <span class="nav-dot" onclick="goTo(2)">顏色系列</span>
+  <span class="nav-dot" onclick="goTo(3)">紋理系列</span>
+  <span class="nav-dot" onclick="goTo(4)">規格與防火</span>
+  <span class="nav-dot" onclick="goTo(5)">應用場景</span>
+</nav>
+
+<!-- ═══════════ SLIDE 0 — COVER ═══════════ -->
+<section class="slide hero-slide active" id="s0">
+  <div class="hero-tag">建材飾面系統</div>
+  <h1 class="hero-title">美耐板材質圖鑑</h1>
+  <p class="hero-sub">高壓耐火飾面板材 · 顏色與紋理選用指南<br>完整規格與應用場景解析</p>
+  <div class="hero-chips">
+    <span class="chip">🎨 色彩選擇豐富</span>
+    <span class="chip">🔥 高耐火性</span>
+    <span class="chip">💪 耐久耐磨</span>
+    <span class="chip">✨ 表面飾面</span>
+    <span class="chip">🏢 室內裝修</span>
+  </div>
+  <div class="btn-nav" style="margin-top:48px; justify-content:center;">
+    <button class="btn btn-primary" onclick="goTo(1)">開始閱讀 →</button>
+  </div>
+</section>
+
+<!-- ═══════════ SLIDE 1 — MATERIAL INTRO ═══════════ -->
+<section class="slide" id="s1">
+  <div class="slide-header">
+    <div class="slide-label">01 — 材料介紹</div>
+    <h2 class="slide-title">什麼是<span>美耐板</span>？</h2>
+    <p class="slide-desc">美耐板（HPL，High Pressure Laminate）是以紙漿纖維紙層、酚醛樹脂或三聚氰胺樹脂，經高溫高壓製成的高端飾面板材。具有耐火、耐磨、耐污、易清潔等優勢，廣泛應用於商業空間、公共設施、家居裝飾。</p>
+  </div>
+
+  <div style="display:grid; gap:20px;">
+    <!-- 材質組成 -->
+    <div class="section-box">
+      <div class="section-box-title">🔬 材質組成</div>
+      <ul class="check-list">
+        <li><strong>表層（Face Paper）</strong> — 透印紙，承載色彩與紋理圖案</li>
+        <li><strong>芯層（Core Paper）</strong> — 牛皮紙，提供強度與厚度</li>
+        <li><strong>膠粘層（Resin）</strong> — 酚醛或三聚氰胺樹脂，黏結各層紙張</li>
+        <li><strong>背層（Back Paper）</strong> — 背面紙層，提高穩定性與平整度</li>
+      </ul>
+    </div>
+
+    <!-- 主要特性 -->
+    <div class="section-box">
+      <div class="section-box-title">⭐ 主要特性</div>
+      <ul class="check-list">
+        <li><strong>高耐火性</strong> — CNS 或歐盟防火標準認證（A2-s1, d0 / B-s1, d0）</li>
+        <li><strong>耐磨耐污</strong> — 高耐研磨指數，抗表面刮傷與污漬</li>
+        <li><strong>易清潔</strong> — 光滑表面可用溫水或中性清潔劑擦拭</li>
+        <li><strong>色彩豐富</strong> — 自然紋理到超現代設計，選擇多樣</li>
+        <li><strong>耐化學性</strong> — 抗油脂、酸鹼液、酒精等常見物質</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="btn-nav">
+    <button class="btn btn-ghost" onclick="goTo(0)">← 上一頁</button>
+    <button class="btn btn-primary" onclick="goTo(2)">下一頁 →</button>
+  </div>
+</section>
+
+<!-- ═══════════ SLIDE 2 — COLOR PALETTE ═══════════ -->
+<section class="slide" id="s2">
+  <div class="slide-header">
+    <div class="slide-label">02 — 顏色系列</div>
+    <h2 class="slide-title">經典<span>色彩</span>選用</h2>
+    <p class="slide-desc">美耐板顏色系列豐富，從低調沉穩的中性色到溫暖鮮豔的裝飾色，可滿足各式空間設計需求。</p>
+  </div>
+
+  <!-- 單色系列色板 -->
+  <div>
+    <div style="font-size:14px; font-weight:700; color:var(--accent); margin-bottom:16px;">■ 單色系列</div>
+    <div class="color-grid">
+      <div class="color-swatch">
+        <div class="swatch-color" style="background:#1a1a1a;"></div>
+        <div class="swatch-label">黑色<br>Pure Black</div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-color" style="background:#ffffff;border:1px solid var(--border);"></div>
+        <div class="swatch-label">白色<br>Pure White</div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-color" style="background:#808080;"></div>
+        <div class="swatch-label">灰色<br>Grey</div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-color" style="background:#c0c0c0;"></div>
+        <div class="swatch-label">銀色<br>Silver</div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-color" style="background:#d4a574;"></div>
+        <div class="swatch-label">米色<br>Beige</div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-color" style="background:#a0826d;"></div>
+        <div class="swatch-label">棕色<br>Brown</div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-color" style="background:#2c3e50;"></div>
+        <div class="swatch-label">深藍<br>Navy Blue</div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-color" style="background:#e74c3c;"></div>
+        <div class="swatch-label">紅色<br>Red</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" style="margin:28px 0;">
+
+  <!-- 溫暖色系 -->
+  <div>
+    <div style="font-size:14px; font-weight:700; color:var(--accent3); margin-bottom:16px;">■ 溫暖色系</div>
+    <div class="color-grid">
+      <div class="color-swatch">
+        <div class="swatch-color" style="background:#f39c12;"></div>
+        <div class="swatch-label">金黃色<br>Gold</div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-color" style="background:#e67e22;"></div>
+        <div class="swatch-label">橙色<br>Orange</div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-color" style="background:#d4a574;"></div>
+        <div class="swatch-label">淺棕<br>Light Brown</div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-color" style="background:#c b7d6c;"></div>
+        <div class="swatch-label">土色<br>Earth Tone</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" style="margin:28px 0;">
+
+  <!-- 清爽色系 -->
+  <div>
+    <div style="font-size:14px; font-weight:700; color:var(--accent2); margin-bottom:16px;">■ 清爽色系</div>
+    <div class="color-grid">
+      <div class="color-swatch">
+        <div class="swatch-color" style="background:#1abc9c;"></div>
+        <div class="swatch-label">青綠色<br>Turquoise</div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-color" style="background:#16a085;"></div>
+        <div class="swatch-label">深綠<br>Dark Green</div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-color" style="background:#3498db;"></div>
+        <div class="swatch-label">天藍<br>Sky Blue</div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-color" style="background:#2980b9;"></div>
+        <div class="swatch-label">深藍<br>Dark Blue</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-nav">
+    <button class="btn btn-ghost" onclick="goTo(1)">← 上一頁</button>
+    <button class="btn btn-primary" onclick="goTo(3)">下一頁 →</button>
+  </div>
+</section>
+
+<!-- ═══════════ SLIDE 3 — TEXTURE SERIES ═══════════ -->
+<section class="slide" id="s3">
+  <div class="slide-header">
+    <div class="slide-label">03 — 紋理系列</div>
+    <h2 class="slide-title">表面<span>紋理</span>設計</h2>
+    <p class="slide-desc">美耐板表面可呈現不同質感，從光滑高亮至自然啞光，甚至仿石材、木紋、金屬等特殊效果。</p>
+  </div>
+
+  <div class="card-grid" style="margin-top:20px;">
+
+    <!-- 光面 -->
+    <div class="card" style="--card-color:#4f8ef7;">
+      <div class="card-title">光面 (Gloss)</div>
+      <div class="card-sub">高光亮澤表面</div>
+      <div class="card-body">
+        表面光滑反光，易於擦拭清潔，適合現代簡約風格。色彩飽和度高，視覺效果突出，但易於顯示指紋與灰塵。
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:12px 0;">
+      <div style="font-size:12.5px;color:var(--text-muted);line-height:1.8;">
+        <div><span style="color:var(--text-dim);display:inline-block;min-width:64px;">特性</span>亮度高、易清潔、現代感強</div>
+        <div><span style="color:var(--text-dim);display:inline-block;min-width:64px;">適用</span>高級商業空間、展示空間</div>
+      </div>
+      <div class="card-tags" style="margin-top:12px;">
+        <span class="tag blue">高亮澤</span>
+        <span class="tag">易清潔</span>
+        <span class="tag">顯指紋</span>
+      </div>
+    </div>
+
+    <!-- 啞光 -->
+    <div class="card" style="--card-color:#7dd3b0;">
+      <div class="card-title">啞光 (Matte)</div>
+      <div class="card-sub">低調消光表面</div>
+      <div class="card-body">
+        表面不反光，呈現柔和質感，營造典雅沉穩氛圍。不顯指紋，更易於日常維護，適合住宅與文教空間。
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:12px 0;">
+      <div style="font-size:12.5px;color:var(--text-muted);line-height:1.8;">
+        <div><span style="color:var(--text-dim);display:inline-block;min-width:64px;">特性</span>消光、溫和、不顯痕跡</div>
+        <div><span style="color:var(--text-dim);display:inline-block;min-width:64px;">適用</span>住宅、辦公室、文教機構</div>
+      </div>
+      <div class="card-tags" style="margin-top:12px;">
+        <span class="tag green">低調質感</span>
+        <span class="tag">不顯指紋</span>
+        <span class="tag">易維護</span>
+      </div>
+    </div>
+
+    <!-- 木紋 -->
+    <div class="card" style="--card-color:#f7c94f;">
+      <div class="card-title">木紋 (Wood Grain)</div>
+      <div class="card-sub">仿自然紋理</div>
+      <div class="card-body">
+        印刷紋理逼真還原實木質感，如橡木、胡桃木、柚木等。結合耐磨實用性與木作溫暖感，應用廣泛。
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:12px 0;">
+      <div style="font-size:12.5px;color:var(--text-muted);line-height:1.8;">
+        <div><span style="color:var(--text-dim);display:inline-block;min-width:64px;">特性</span>逼真紋理、溫暖感、多樣選擇</div>
+        <div><span style="color:var(--text-dim);display:inline-block;min-width:64px;">適用</span>家具、門板、牆面、室內裝飾</div>
+      </div>
+      <div class="card-tags" style="margin-top:12px;">
+        <span class="tag gold">逼真質感</span>
+        <span class="tag">溫暖調</span>
+        <span class="tag">多色系</span>
+      </div>
+    </div>
+
+    <!-- 石材 -->
+    <div class="card" style="--card-color:#f77f6b;">
+      <div class="card-title">石材 (Stone)</div>
+      <div class="card-sub">仿石材紋理</div>
+      <div class="card-body">
+        質感逼真還原大理石、花崗岩、板岩等石材外觀。冷調高級感，適合現代商業設計與高級住宅。
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:12px 0;">
+      <div style="font-size:12.5px;color:var(--text-muted);line-height:1.8;">
+        <div><span style="color:var(--text-dim);display:inline-block;min-width:64px;">特性</span>石質感、高級冷調、耐久性好</div>
+        <div><span style="color:var(--text-dim);display:inline-block;min-width:64px;">適用</span>商業空間、高級住宅、公共設施</div>
+      </div>
+      <div class="card-tags" style="margin-top:12px;">
+        <span class="tag red">石質感</span>
+        <span class="tag">高級感</span>
+        <span class="tag">冷調</span>
+      </div>
+    </div>
+
+    <!-- 金屬 -->
+    <div class="card" style="--card-color:#a78bfa;">
+      <div class="card-title">金屬 (Metallic)</div>
+      <div class="card-sub">金屬光澤效果</div>
+      <div class="card-body">
+        呈現金、銀、銅等金屬質感，具有科技感與現代感。光澤效果獨特，適合前衛設計與商業展示。
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:12px 0;">
+      <div style="font-size:12.5px;color:var(--text-muted);line-height:1.8;">
+        <div><span style="color:var(--text-dim);display:inline-block;min-width:64px;">特性</span>金屬感、科技感、獨特光澤</div>
+        <div><span style="color:var(--text-dim);display:inline-block;min-width:64px;">適用</span>設計展示、科技空間、前衛設計</div>
+      </div>
+      <div class="card-tags" style="margin-top:12px;">
+        <span class="tag" style="background:#1e1530;color:#a78bfa;border-color:#3d2b60;">金屬質感</span>
+        <span class="tag">科技感</span>
+        <span class="tag">現代感</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="btn-nav">
+    <button class="btn btn-ghost" onclick="goTo(2)">← 上一頁</button>
+    <button class="btn btn-primary" onclick="goTo(4)">下一頁 →</button>
+  </div>
+</section>
+
+<!-- ═══════════ SLIDE 4 — SPECS & FIRE RATING ═══════════ -->
+<section class="slide" id="s4">
+  <div class="slide-header">
+    <div class="slide-label">04 — 規格與防火</div>
+    <h2 class="slide-title">規格<span>與標準</span></h2>
+    <p class="slide-desc">美耐板規格多樣，厚度、尺寸、防火等級應依應用場景選用。</p>
+  </div>
+
+  <div style="overflow-x:auto; margin-top:20px;">
+    <table class="spec-table">
+      <thead>
+        <tr>
+          <th>厚度等級</th>
+          <th>標準厚度 (mm)</th>
+          <th>標準尺寸 (mm)</th>
+          <th>應用場景</th>
+          <th>特色</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>標準厚度</strong></td>
+          <td class="highlight">0.8 · 1.0</td>
+          <td>1220×2440</td>
+          <td>門板、裝飾面、傢具貼面</td>
+          <td>輕薄、經濟、應用廣泛</td>
+        </tr>
+        <tr>
+          <td><strong>加厚規格</strong></td>
+          <td class="highlight">1.2 · 1.6</td>
+          <td>1220×2440</td>
+          <td>牆面、檯面、高耐磨區域</td>
+          <td>強度高、耐磨性更佳</td>
+        </tr>
+        <tr>
+          <td><strong>超厚規格</strong></td>
+          <td class="highlight">2.0 · 2.5</td>
+          <td>1220×2440</td>
+          <td>工業場景、檯面、商業空間</td>
+          <td>超強耐久性、防刮傷</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-box" style="margin-top:20px;">
+    <div class="section-box-title">🔥 防火等級</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; font-size:13px; color:var(--text-muted);">
+      <div>
+        <div style="color:var(--accent2); font-weight:700; margin-bottom:4px;">■ 國際標準 (EN 13823)</div>
+        <div style="line-height:1.8;">
+          <div><strong style="color:var(--text);">A2-s1, d0</strong> — 最高防火等級，不燃材料</div>
+          <div><strong style="color:var(--text);">B-s1, d0</strong> — 高防火等級，難燃材料</div>
+          <div><strong style="color:var(--text);">C-s2, d1</strong> — 標準防火等級</div>
+        </div>
+      </div>
+      <div>
+        <div style="color:var(--accent2); font-weight:700; margin-bottom:4px;">■ 台灣標準 (CNS)</div>
+        <div style="line-height:1.8;">
+          <div><strong style="color:var(--text);">A1 不燃</strong> — 最高等級</div>
+          <div><strong style="color:var(--text);">A2 耐燃一級</strong> — 難燃材料</div>
+          <div><strong style="color:var(--text);">B1 耐燃二級</strong> — 可燃材料</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-nav">
+    <button class="btn btn-ghost" onclick="goTo(3)">← 上一頁</button>
+    <button class="btn btn-primary" onclick="goTo(5)">下一頁 →</button>
+  </div>
+</section>
+
+<!-- ═══════════ SLIDE 5 — APPLICATIONS ═══════════ -->
+<section class="slide" id="s5">
+  <div class="slide-header">
+    <div class="slide-label">05 — 應用場景</div>
+    <h2 class="slide-title">依場景<span>選用建議</span></h2>
+    <p class="slide-desc">美耐板應用多樣，根據空間功能、用途、預算與設計風格，選擇合適的厚度、顏色與紋理組合。</p>
+  </div>
+
+  <div style="overflow-x:auto; margin-top:20px;">
+    <table class="spec-table">
+      <thead>
+        <tr>
+          <th>應用場景</th>
+          <th>推薦規格</th>
+          <th>推薦紋理</th>
+          <th>推薦色系</th>
+          <th>防火需求</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>家具門板</strong></td>
+          <td>0.8–1.0mm</td>
+          <td>木紋 / 啞光</td>
+          <td>溫暖色、中性色</td>
+          <td>B-s1 / CNS A2</td>
+        </tr>
+        <tr>
+          <td><strong>廚房檯面</strong></td>
+          <td>1.2–1.6mm</td>
+          <td>光面 / 啞光</td>
+          <td>白色、淺色系</td>
+          <td class="good">A2-s1 / CNS A1</td>
+        </tr>
+        <tr>
+          <td><strong>辦公隔間</strong></td>
+          <td>0.8–1.0mm</td>
+          <td>啞光 / 木紋</td>
+          <td>中性色、淺色</td>
+          <td class="good">B-s1 / CNS A2</td>
+        </tr>
+        <tr>
+          <td><strong>商業展示</strong></td>
+          <td>1.2–1.6mm</td>
+          <td>光面 / 金屬感</td>
+          <td>黑色、深色系</td>
+          <td class="good">A2-s1 / CNS A1</td>
+        </tr>
+        <tr>
+          <td><strong>高級住宅牆面</strong></td>
+          <td>1.0–1.2mm</td>
+          <td>石材 / 木紋</td>
+          <td>冷調、溫暖色混合</td>
+          <td class="good">B-s1 / CNS A2</td>
+        </tr>
+        <tr>
+          <td><strong>公共設施</strong></td>
+          <td>1.6–2.0mm</td>
+          <td>光面 / 啞光</td>
+          <td>淺色、易清潔色</td>
+          <td class="good">A2-s1 / CNS A1</td>
+        </tr>
+        <tr>
+          <td><strong>醫療院所</strong></td>
+          <td>1.2–1.6mm</td>
+          <td>光面 / 啞光</td>
+          <td>清爽色系、白色</td>
+          <td class="good">A2-s1 / CNS A1</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-box" style="margin-top:20px;">
+    <div class="section-box-title">💡 選用提示</div>
+    <ul class="check-list">
+      <li><strong>高耐磨區域</strong>（廚房、檯面）建議選用 1.2mm 以上厚度，確保長期耐用性</li>
+      <li><strong>公共場所</strong>應優先考慮 A2-s1 或 CNS A1 防火等級，符合安全法規</li>
+      <li><strong>淺色系</strong>易於顯示污漬，適合辦公或商業區；深色系可隱藏灰塵，易於維護</li>
+      <li><strong>石材或金屬紋理</strong>適合高級商業空間；木紋適合住宅空間營造溫度感</li>
+      <li><strong>采購前詢問</strong>廠商提供樣品，實際色澤與紋理效果因燈光、屏幕而異</li>
+    </ul>
+  </div>
+
+  <div class="btn-nav">
+    <button class="btn btn-ghost" onclick="goTo(4)">← 上一頁</button>
+    <button class="btn btn-primary" onclick="goTo(0)">回到封面</button>
+  </div>
+</section>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dots   = document.querySelectorAll('.nav-dot');
+  let current  = 0;
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(Math.min(current+1, slides.length-1));
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(Math.max(current-1, 0));
+  });
+</script>
+</body>
+</html>
