@@ -774,8 +774,16 @@ function exportCsv() {
   const rows = [["date", `${pref.base}/${pref.quote}`, "SMA20", "SMA50", "RSI14", "MACD", "Signal"]];
   view.t.forEach((t, i) => rows.push([iso(t), view.v[i], view.s20[i], view.s50[i], view.rsi[i], view.ml[i], view.ms[i]].map(x => typeof x === "number" ? (isFinite(x) ? +x.toPrecision(10) : "") : x)));
   const blob = new Blob(["﻿" + rows.map(r => r.join(",")).join("\n")], { type: "text/csv" });
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `${pref.base}${pref.quote}_${pref.range}_${latestDate}.csv`; a.click();
+  const filename = `${pref.base}${pref.quote}_${pref.range}_${latestDate}.csv`;
+  if (downloads) { downloads.save({ filename, data: blob }).catch(() => {}); return; }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+// 在 claude.ai 內嵌檢視時透過平台下載；一般瀏覽器直接用下載連結
+let downloads = null;
+if (window.claude && typeof window.claude.use === "function") {
+  $("btnCsv").hidden = true;
+  window.claude.use("downloads").then(d => { downloads = d; $("btnCsv").hidden = !d; }).catch(() => {});
 }
 
 function render() {
