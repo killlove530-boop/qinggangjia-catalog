@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>外匯看盤分析</title>
+<meta name="description" content="外匯即時看盤與技術分析：走勢圖、均線、布林通道、RSI、MACD、貨幣強弱、相關性與換匯試算。">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --surface-2: #f3f2ee;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11,11,11,0.10);
+  --s1: #2a78d6;  /* 價格 */
+  --s2: #eb6834;  /* SMA20 / 訊號線 */
+  --s3: #1baf7a;  /* SMA50 */
+  --up: #d03b3b;  /* 台灣慣例：紅漲 */
+  --down: #0a8f0a; /* 綠跌 */
+  --neutral: #898781;
+  --div-pos: #2a78d6;
+  --div-neg: #e34948;
+  --div-mid: #f0efec;
+  --accent: #2a78d6;
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321;
+    --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+    --up: #e66767; --down: #0ca30c;
+    --div-pos: #3987e5; --div-neg: #e66767; --div-mid: #383835;
+    --accent: #3987e5; --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321;
+  --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+  --up: #e66767; --down: #0ca30c;
+  --div-pos: #3987e5; --div-neg: #e66767; --div-mid: #383835;
+  --accent: #3987e5; --shadow: none;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--page); color: var(--ink);
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+.num { font-variant-numeric: tabular-nums; }
+.wrap { max-width: 1320px; margin: 0 auto; padding: 16px; }
+header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+header h1 { font-size: 20px; margin: 0; letter-spacing: .02em; }
+header .status { color: var(--ink-2); font-size: 12px; flex: 1 1 280px; min-width: 0; }
+header .status b { color: var(--ink); font-weight: 600; }
+.btn {
+  appearance: none; border: 1px solid var(--border); background: var(--surface); color: var(--ink);
+  padding: 6px 12px; border-radius: 8px; font: inherit; cursor: pointer; line-height: 1.3;
+}
+.btn:hover { background: var(--surface-2); }
+.btn[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.btn:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+select, input[type=number] {
+  font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 8px; min-width: 0;
+}
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 14px; min-width: 0; }
+.card h2 { font-size: 14px; margin: 0 0 10px; color: var(--ink); font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.card h2 small { color: var(--muted); font-weight: 400; font-size: 12px; }
+.layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 14px; }
+@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } .side { order: 2; } }
+.side, .main { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+.banner { padding: 10px 12px; border-radius: 10px; margin-bottom: 12px; font-size: 13px; border: 1px solid var(--border); background: var(--surface-2); }
+.banner.err { border-color: var(--up); }
+.progress { height: 3px; background: var(--grid); border-radius: 2px; overflow: hidden; margin-bottom: 12px; }
+.progress i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+
+/* 自選清單 */
+.watch { list-style: none; margin: 0; padding: 0; }
+.watch li { display: grid; grid-template-columns: 1fr 64px auto; align-items: center; gap: 8px; padding: 8px 6px; border-radius: 8px; cursor: pointer; }
+.watch li:hover { background: var(--surface-2); }
+.watch li[aria-current="true"] { background: var(--surface-2); box-shadow: inset 3px 0 0 var(--accent); }
+.watch .nm { font-weight: 600; font-size: 13px; }
+.watch .sub { color: var(--muted); font-size: 11px; }
+.watch .px { text-align: right; font-size: 13px; }
+.watch canvas { width: 64px; height: 24px; display: block; }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toolbar .grp { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+.toolbar .sep { flex: 1; }
+.pairsel { display: flex; gap: 6px; align-items: center; }
+
+.quote { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin: 4px 0 10px; }
+.quote .big { font-size: 34px; font-weight: 650; letter-spacing: -.01em; }
+.quote .chg { font-size: 15px; font-weight: 600; }
+.quote .pname { color: var(--ink-2); }
+.up { color: var(--up); } .down { color: var(--down); } .flat { color: var(--neutral); }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 12px; }
+.tile { background: var(--surface-2); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+.tile .k { font-size: 11px; color: var(--muted); }
+.tile .v { font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.chartbox { position: relative; }
+.chartbox canvas { display: block; width: 100%; touch-action: pan-y; }
+#cPrice { height: 320px; } #cRsi { height: 110px; } #cMacd { height: 130px; }
+@media (max-width: 600px) { #cPrice { height: 240px; } }
+.chartlabel { position: absolute; left: 8px; top: 2px; font-size: 11px; color: var(--muted); pointer-events: none; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--ink-2); margin: 2px 0 6px; }
+.legend span::before { content: ""; display: inline-block; width: 14px; height: 2px; vertical-align: middle; margin-right: 5px; background: var(--c); }
+.legend span.band::before { height: 8px; opacity: .25; }
+.tip {
+  position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.12);
+  min-width: 150px; display: none; z-index: 5;
+}
+.tip .d { font-weight: 600; margin-bottom: 4px; }
+.tip .r { display: flex; justify-content: space-between; gap: 12px; color: var(--ink-2); }
+.tip .r b { color: var(--ink); font-weight: 600; }
+.tip .r i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; background: var(--c); }
+
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.signals { list-style: none; margin: 0; padding: 0; }
+.signals li { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 7px 0; border-bottom: 1px solid var(--grid); }
+.signals li:last-child { border-bottom: 0; }
+.signals .desc { grid-column: 1 / -1; color: var(--muted); font-size: 12px; }
+.pill { font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.verdict { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--surface-2); border-radius: 10px; margin-bottom: 8px; }
+.verdict .big { font-size: 20px; font-weight: 700; }
+.meter { flex: 1; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--down), var(--div-mid), var(--up)); position: relative; }
+.meter i { position: absolute; top: -4px; width: 4px; height: 16px; border-radius: 2px; background: var(--ink); transform: translateX(-2px); }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 6px 6px; text-align: right; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--muted); font-weight: 500; font-size: 12px; }
+.tscroll { overflow: auto; max-height: 360px; }
+
+.bars .row { display: grid; grid-template-columns: 104px 1fr 64px; align-items: center; gap: 8px; padding: 3px 0; font-size: 13px; }
+.bars .track { position: relative; height: 16px; }
+.bars .track::before { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--axis); }
+.bars .bar { position: absolute; top: 2px; height: 12px; }
+.bars .bar.pos { left: 50%; background: var(--div-pos); border-radius: 0 4px 4px 0; }
+.bars .bar.neg { right: 50%; background: var(--div-neg); border-radius: 4px 0 0 4px; }
+.bars .val { text-align: right; }
+
+.heat { display: grid; gap: 2px; font-size: 11px; }
+.heat div { padding: 6px 2px; text-align: center; border-radius: 3px; min-width: 0; overflow: hidden; }
+.heat .h { color: var(--muted); background: none; }
+.hlegend { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); margin-top: 8px; }
+.hlegend .g { flex: 1; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--div-neg), var(--div-mid), var(--div-pos)); }
+
+.conv { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.conv label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); min-width: 0; }
+.conv input, .conv select { width: 100%; }
+.conv .res { grid-column: 1 / -1; background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
+.conv .res .v { font-size: 22px; font-weight: 650; }
+.conv .res .s { font-size: 12px; color: var(--muted); }
+.note { font-size: 12px; color: var(--muted); }
+footer { margin-top: 18px; font-size: 12px; color: var(--muted); }
+footer a { color: var(--ink-2); }
+details summary { cursor: pointer; font-weight: 600; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>外匯看盤分析</h1>
+    <div class="status" id="status">載入中…</div>
+    <button class="btn" id="btnRefresh" title="重新抓取最新匯率">重新整理</button>
+    <button class="btn" id="btnTheme" title="切換深淺色">深淺色</button>
+  </header>
+  <div class="progress" id="progress" hidden><i></i></div>
+  <div id="banner"></div>
+
+  <div class="layout">
+    <aside class="side">
+      <section class="card">
+        <h2>自選匯率 <small>點選切換</small></h2>
+        <ul class="watch" id="watch"></ul>
+      </section>
+      <section class="card">
+        <h2>換匯試算 <small>進口採購估價</small></h2>
+        <div class="conv">
+          <label>金額<input type="number" id="cvAmt" value="10000" min="0" step="any" inputmode="decimal"></label>
+          <label>銀行價差 %<input type="number" id="cvSpread" value="0.5" min="0" step="0.1" inputmode="decimal"></label>
+          <label>從<select id="cvFrom"></select></label>
+          <label>換成<select id="cvTo"></select></label>
+          <div class="res">
+            <div class="v num" id="cvOut">—</div>
+            <div class="s num" id="cvNote"></div>
+          </div>
+        </div>
+        <p class="note">以國際中價計算，並依價差估算銀行賣出價。實際匯款請以銀行牌告為準。</p>
+      </section>
+    </aside>
+
+    <main class="main">
+      <section class="card">
+        <div class="toolbar">
+          <div class="pairsel">
+            <select id="selBase" aria-label="基準貨幣"></select>
+            <button class="btn" id="btnSwap" title="對調" aria-label="對調貨幣">⇄</button>
+            <select id="selQuote" aria-label="報價貨幣"></select>
+          </div>
+          <div class="sep"></div>
+          <div class="grp" id="ranges" role="group" aria-label="時間區間"></div>
+        </div>
+
+        <div class="quote">
+          <span class="big num" id="qPrice">—</span>
+          <span class="chg num" id="qChg"></span>
+          <span class="pname" id="qName"></span>
+        </div>
+        <div class="tiles" id="tiles"></div>
+
+        <div class="legend" id="legend">
+          <span style="--c:var(--s1)">價格</span>
+          <label><input type="checkbox" id="tSma20" checked> <span style="--c:var(--s2)">SMA 20</span></label>
+          <label><input type="checkbox" id="tSma50" checked> <span style="--c:var(--s3)">SMA 50</span></label>
+          <label><input type="checkbox" id="tBoll" checked> <span class="band" style="--c:var(--s1)">布林通道 (20, 2σ)</span></label>
+        </div>
+        <div class="chartbox" id="boxPrice"><canvas id="cPrice" role="img" aria-label="價格走勢圖"></canvas><div class="tip" id="tip"></div></div>
+        <div class="chartbox"><canvas id="cRsi" role="img" aria-label="RSI 指標"></canvas><span class="chartlabel">RSI 14</span></div>
+        <div class="chartbox"><canvas id="cMacd" role="img" aria-label="MACD 指標"></canvas><span class="chartlabel">MACD 12 / 26 / 9</span></div>
+        <p class="note" id="sampleNote"></p>
+      </section>
+
+      <div class="grid2">
+        <section class="card">
+          <h2>技術分析訊號 <small id="sigPair"></small></h2>
+          <div class="verdict"><span class="big" id="vText">—</span><div class="meter"><i id="vMark" style="left:50%"></i></div></div>
+          <ul class="signals" id="signals"></ul>
+          <p class="note">「偏多」表示基準貨幣相對報價貨幣走強（匯價上升）。</p>
+        </section>
+        <section class="card">
+          <h2>區間績效</h2>
+          <table class="num" id="perf"></table>
+          <h2 style="margin-top:16px">貨幣強弱 <small id="strRange"></small></h2>
+          <div class="bars num" id="strength"></div>
+          <p class="note">相對十種主要貨幣平均值的升貶幅度（藍＝走強、紅＝走弱）。</p>
+        </section>
+      </div>
+
+      <section class="card">
+        <h2>兌新台幣相關性 <small>日報酬相關係數，選定區間</small></h2>
+        <div class="heat num" id="heat"></div>
+        <div class="hlegend"><span>−1 反向</span><span class="g"></span><span>+1 同向</span></div>
+      </section>
+
+      <section class="card">
+        <details id="dataDetails">
+          <summary>歷史資料表</summary>
+          <div style="margin:10px 0"><button class="btn" id="btnCsv">下載 CSV</button></div>
+          <div class="tscroll"><table class="num" id="dataTable"></table></div>
+        </details>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    資料來源：<a href="https://github.com/fawazahmed0/exchange-api" target="_blank" rel="noopener">fawazahmed0/exchange-api</a>（每日更新之國際中價，非即時成交價）。
+    若同目錄下有 <code>data/rates.json</code>（由 <code>collect.py</code> 產生），會優先使用。
+    本工具僅供參考，不構成任何投資建議。 · <a href="../index.html">回首頁</a>
+  </footer>
+</div>
+
+<script>
+"use strict";
+// ============ 設定 ============
+const CUR = {
+  TWD: "新台幣", USD: "美元", EUR: "歐元", JPY: "日圓", GBP: "英鎊", CNY: "人民幣",
+  HKD: "港幣", AUD: "澳幣", CAD: "加幣", CHF: "瑞士法郎", SGD: "新加坡幣", KRW: "韓元",
+  NZD: "紐西蘭幣", THB: "泰銖", MYR: "馬來西亞幣", PHP: "菲律賓披索", IDR: "印尼盾",
+  VND: "越南盾", INR: "印度盧比", XAU: "黃金(盎司)"
+};
+const CODES = Object.keys(CUR);
+const WATCH = [["USD","TWD"],["EUR","TWD"],["JPY","TWD"],["CNY","TWD"],["GBP","TWD"],["HKD","TWD"],
+               ["AUD","TWD"],["EUR","USD"],["USD","JPY"],["GBP","USD"],["USD","CNY"],["XAU","USD"]];
+const BASKET = ["USD","EUR","JPY","GBP","CNY","AUD","CAD","CHF","HKD","TWD"];
+const HEAT = ["USD","EUR","JPY","CNY","GBP","AUD","HKD","KRW","XAU"];
+const RANGES = [ // 天數、取樣間隔（天）
+  { k: "1M", label: "1月", days: 31, step: 1 },
+  { k: "3M", label: "3月", days: 92, step: 1 },
+  { k: "6M", label: "6月", days: 183, step: 2 },
+  { k: "1Y", label: "1年", days: 366, step: 3 },
+  { k: "2Y", label: "2年", days: 731, step: 7 },
+];
+const WARMUP = 50;           // 指標暖機期數（SMA50）
+const EARLIEST = "2024-03-02"; // 資料源最早日期
+const DAY = 86400000;
+const CACHE_KEY = "fx-cache-v1", PREF_KEY = "fx-pref-v1";
+
+// ============ 狀態 ============
+const store = new Map();  // "YYYY-MM-DD" -> {CODE: 每 1 美元可兌換數量}
+let latestDate = null, failures = 0, fromLocalFile = 0;
+const pref = Object.assign({ base: "USD", quote: "TWD", range: "3M", sma20: true, sma50: true, boll: true },
+                           safeGet(PREF_KEY) || {});
+let view = null, hover = -1;
+
+function safeGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
+function safeSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+const $ = id => document.getElementById(id);
+const iso = t => new Date(t).toISOString().slice(0, 10);
+const tOf = d => Date.parse(d + "T00:00:00Z");
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// ============ 資料抓取 ============
+function urls(tag) {
+  return [
+    `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${tag}/v1/currencies/usd.min.json`,
+    `https://${tag}.currency-api.pages.dev/v1/currencies/usd.min.json`,
+  ];
+}
+function pick(usd) {
+  const o = { USD: 1 };
+  for (const c of CODES) if (c !== "USD" && usd[c.toLowerCase()] > 0) o[c] = usd[c.toLowerCase()];
+  return o;
+}
+async function fetchDay(tag) {
+  for (const u of urls(tag)) {
+    try {
+      const r = await fetch(u, { cache: tag === "latest" ? "no-cache" : "force-cache" });
+      if (!r.ok) continue;
+      const j = await r.json();
+      const d = /^\d{4}-\d{2}-\d{2}$/.test(j.date) ? j.date : tag;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || !j.usd) continue;
+      store.set(d, pick(j.usd));
+      return d;
+    } catch (e) {}
+  }
+  failures++;
+  return null;
+}
+async function loadLocalFile() {
+  try {
+    const r = await fetch("data/rates.json", { cache: "no-cache" });
+    if (!r.ok) return;
+    const j = await r.json();
+    for (const [d, v] of Object.entries(j.rates || {})) { store.set(d, Object.assign({ USD: 1 }, v)); fromLocalFile++; }
+  } catch (e) {}
+}
+function loadCache() {
+  const c = safeGet(CACHE_KEY);
+  if (c && typeof c === "object") for (const [d, v] of Object.entries(c)) if (!store.has(d)) store.set(d, v);
+}
+function saveCache() {
+  const o = {};
+  const keep = [...store.keys()].sort().slice(-900);
+  for (const d of keep) o[d] = store.get(d);
+  safeSet(CACHE_KEY, o);
+}
+async function pool(tasks, n, onTick) {
+  let i = 0, done = 0;
+  const run = async () => { while (i < tasks.length) { const t = tasks[i++]; await t(); onTick(++done, tasks.length); } };
+  await Promise.all(Array.from({ length: Math.min(n, tasks.length) }, run));
+}
+function neededDates(range) {
+  const end = latestDate ? tOf(latestDate) : Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate()) - DAY;
+  const start = Math.max(tOf(EARLIEST), end - (range.days + WARMUP * range.step * 1.45) * DAY);
+  const out = [];
+  // 對齊取樣日，讓不同次開啟時快取可重複使用
+  let t = Math.ceil(start / DAY / range.step) * range.step * DAY;
+  for (; t <= end; t += range.step * DAY) out.push(iso(t));
+  // 區間績效需要的基準日
+  for (const back of [7, 30, 91, 182, 365]) out.push(iso(Math.max(tOf(EARLIEST), end - back * DAY)));
+  out.push(iso(Math.max(tOf(EARLIEST), Date.UTC(new Date(end).getUTCFullYear(), 0, 1))));
+  return [...new Set(out)];
+}
+let loading = false;
+async function ensureData(forceLatest) {
+  if (loading) return; loading = true;
+  const range = RANGES.find(r => r.k === pref.range);
+  const bar = $("progress"), fill = bar.firstElementChild;
+  try {
+    if (forceLatest || !latestDate) {
+      const d = await fetchDay("latest");
+      if (d) latestDate = d;
+      else if (store.size) latestDate = [...store.keys()].sort().pop();
+    }
+    const miss = neededDates(range).filter(d => !store.has(d));
+    if (miss.length) {
+      bar.hidden = false; fill.style.width = "0";
+      await pool(miss.map(d => () => fetchDay(d)), 8, (k, n) => {
+        fill.style.width = (k / n * 100) + "%";
+        $("status").textContent = `下載歷史匯率 ${k} / ${n}…`;
+        if (k % 25 === 0) render();
+      });
+      bar.hidden = true;
+      saveCache();
+    }
+  } finally { loading = false; }
+  render();
+}
+
+// ============ 計算 ============
+const rate = (d, base, quote) => { const r = store.get(d); return r && r[base] && r[quote] ? r[quote] / r[base] : NaN; };
+function series(base, quote, fromT, step = 1) {
+  // 長區間以固定間隔取樣，避免快取中的每日資料與取樣資料混雜造成指標期數不一致
+  const ds = [...store.keys()].sort().filter(d => tOf(d) >= fromT && (!latestDate || d <= latestDate) &&
+    (step === 1 || fromLocalFile || d === latestDate || Math.round(tOf(d) / DAY) % step === 0));
+  const t = [], v = [];
+  for (const d of ds) { const x = rate(d, base, quote); if (isFinite(x)) { t.push(tOf(d)); v.push(x); } }
+  return { t, v };
+}
+function sma(a, n) { const o = Array(a.length).fill(NaN); let s = 0; for (let i = 0; i < a.length; i++) { s += a[i]; if (i >= n) s -= a[i - n]; if (i >= n - 1) o[i] = s / n; } return o; }
+function ema(a, n) { const o = Array(a.length).fill(NaN), k = 2 / (n + 1); let e; for (let i = 0; i < a.length; i++) { if (!isFinite(a[i])) continue; e = e === undefined ? a[i] : a[i] * k + e * (1 - k); o[i] = e; } return o; }
+function boll(a, n, m) {
+  const mid = sma(a, n), up = Array(a.length).fill(NaN), lo = Array(a.length).fill(NaN);
+  for (let i = n - 1; i < a.length; i++) { let s = 0; for (let j = i - n + 1; j <= i; j++) s += (a[j] - mid[i]) ** 2; const sd = Math.sqrt(s / n); up[i] = mid[i] + m * sd; lo[i] = mid[i] - m * sd; }
+  return { mid, up, lo };
+}
+function rsi(a, n) {
+  const o = Array(a.length).fill(NaN); let g = 0, l = 0;
+  for (let i = 1; i < a.length; i++) {
+    const ch = a[i] - a[i - 1], G = Math.max(ch, 0), L = Math.max(-ch, 0);
+    if (i <= n) { g += G / n; l += L / n; if (i === n) o[i] = l === 0 ? 100 : 100 - 100 / (1 + g / l); }
+    else { g = (g * (n - 1) + G) / n; l = (l * (n - 1) + L) / n; o[i] = l === 0 ? 100 : 100 - 100 / (1 + g / l); }
+  }
+  return o;
+}
+function macd(a) {
+  const f = ema(a, 12), s = ema(a, 26), line = a.map((_, i) => f[i] - s[i]);
+  const valid = line.map((x, i) => i >= 25 ? x : NaN), sig = ema(valid, 9);
+  return { line: valid, sig, hist: valid.map((x, i) => x - sig[i]) };
+}
+function logret(v) { const o = []; for (let i = 1; i < v.length; i++) o.push(Math.log(v[i] / v[i - 1])); return o; }
+function corr(a, b) {
+  const n = Math.min(a.length, b.length); if (n < 5) return NaN;
+  let ma = 0, mb = 0; for (let i = 0; i < n; i++) { ma += a[i]; mb += b[i]; } ma /= n; mb /= n;
+  let sab = 0, sa = 0, sb = 0; for (let i = 0; i < n; i++) { const x = a[i] - ma, y = b[i] - mb; sab += x * y; sa += x * x; sb += y * y; }
+  return sa && sb ? sab / Math.sqrt(sa * sb) : NaN;
+}
+function at(base, quote, target) { // 目標日當天或之前最近一筆（容許 7 天）
+  const ds = [...store.keys()].sort();
+  for (let i = ds.length - 1; i >= 0; i--) {
+    if (ds[i] <= target) { if (tOf(target) - tOf(ds[i]) > 7 * DAY) return NaN; return rate(ds[i], base, quote); }
+  }
+  return NaN;
+}
+
+// ============ 格式 ============
+function dec(x) { const a = Math.abs(x); return a >= 1000 ? 2 : a >= 10 ? 3 : a >= 1 ? 4 : a >= 0.01 ? 5 : 7; }
+const fmt = (x, d) => isFinite(x) ? x.toLocaleString("zh-TW", { minimumFractionDigits: d ?? dec(x), maximumFractionDigits: d ?? dec(x) }) : "—";
+const pct = (x, d = 2) => isFinite(x) ? (x > 0 ? "+" : x < 0 ? "−" : "") + Math.abs(x * 100).toFixed(d) + "%" : "—";
+const cls = x => !isFinite(x) || Math.abs(x) < 1e-9 ? "flat" : x > 0 ? "up" : "down";
+const arrow = x => !isFinite(x) || Math.abs(x) < 1e-9 ? "" : x > 0 ? "▲ " : "▼ ";
+const fmtDate = t => { const d = new Date(t); return `${d.getUTCFullYear()}/${String(d.getUTCMonth() + 1).padStart(2, "0")}/${String(d.getUTCDate()).padStart(2, "0")}`; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+// ============ 畫布圖表 ============
+function niceStep(span, n) { const r = span / n, p = 10 ** Math.floor(Math.log10(r)), f = r / p; return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * p; }
+function setup(cv) {
+  const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+  return { g, w, h };
+}
+const PAD = { l: 8, r: 70, t: 14 };
+function drawChart(cv, o) {
+  const { g, w, h } = setup(cv);
+  const padB = o.xLabels ? 22 : 6, pw = w - PAD.l - PAD.r, ph = h - PAD.t - padB;
+  const T = o.t; if (T.length < 2) { g.fillStyle = css("--muted"); g.font = "12px system-ui"; g.fillText("資料不足", PAD.l + 4, PAD.t + 14); return null; }
+  const t0 = T[0], t1 = T[T.length - 1];
+  let lo = Infinity, hi = -Infinity;
+  const eat = a => a && a.forEach(x => { if (isFinite(x)) { lo = Math.min(lo, x); hi = Math.max(hi, x); } });
+  (o.lines || []).forEach(s => eat(s.v)); if (o.band) { eat(o.band.up); eat(o.band.lo); } if (o.bars) { eat(o.bars); eat([0]); }
+  if (o.fixed) { lo = o.fixed[0]; hi = o.fixed[1]; }
+  if (!isFinite(lo)) return null;
+  if (hi === lo) { hi += Math.abs(hi) * 0.01 || 1; lo -= Math.abs(lo) * 0.01 || 1; }
+  if (!o.fixed) { const p = (hi - lo) * 0.08; hi += p; lo -= p; }
+  const X = t => PAD.l + (t - t0) / (t1 - t0) * pw, Y = v => PAD.t + (hi - v) / (hi - lo) * ph;
+  const muted = css("--muted"), grid = css("--grid");
+  g.font = "11px system-ui, sans-serif"; g.textBaseline = "middle"; g.lineWidth = 1;
+  // Y 軸格線
+  const ticks = o.yTicks || (() => { const s = niceStep(hi - lo, o.small ? 2 : 4), a = []; for (let v = Math.ceil(lo / s) * s; v <= hi; v += s) a.push(+v.toPrecision(12)); return a; })();
+  const yd = o.yDec ?? Math.max(0, -Math.floor(Math.log10(niceStep(hi - lo, o.small ? 2 : 4))));
+  for (const v of ticks) {
+    const y = Math.round(Y(v)) + .5; g.strokeStyle = grid; g.beginPath(); g.moveTo(PAD.l, y); g.lineTo(PAD.l + pw, y); g.stroke();
+    g.fillStyle = muted; g.textAlign = "left"; g.fillText(fmt(v, Math.min(yd, 6)), PAD.l + pw + 6, y);
+  }
+  // X 軸
+  if (o.xLabels) {
+    const spanD = (t1 - t0) / DAY, n = Math.max(2, Math.floor(pw / 90));
+    g.fillStyle = muted; g.textBaseline = "top";
+    for (let i = 0; i <= n; i++) {
+      const t = t0 + (t1 - t0) * i / n, d = new Date(t);
+      const s = spanD > 200 ? `${d.getUTCFullYear()}/${d.getUTCMonth() + 1}` : `${d.getUTCMonth() + 1}/${d.getUTCDate()}`;
+      g.textAlign = i === 0 ? "left" : i === n ? "right" : "center"; g.fillText(s, X(t), PAD.t + ph + 6);
+    }
+    g.textBaseline = "middle";
+  }
+  (o.refs || []).forEach(r => { g.strokeStyle = muted; g.setLineDash([3, 3]); const y = Math.round(Y(r)) + .5; g.beginPath(); g.moveTo(PAD.l, y); g.lineTo(PAD.l + pw, y); g.stroke(); g.setLineDash([]); });
+  g.save(); g.beginPath(); g.rect(PAD.l, PAD.t - 2, pw, ph + 4); g.clip();
+  // 布林通道
+  if (o.band) {
+    const { up, lo: bl, color } = o.band; const idx = T.map((_, i) => i).filter(i => isFinite(up[i]));
+    if (idx.length > 1) {
+      g.beginPath(); idx.forEach((i, k) => k ? g.lineTo(X(T[i]), Y(up[i])) : g.moveTo(X(T[i]), Y(up[i])));
+      for (let k = idx.length - 1; k >= 0; k--) g.lineTo(X(T[idx[k]]), Y(bl[idx[k]]));
+      g.closePath(); g.globalAlpha = .1; g.fillStyle = color; g.fill(); g.globalAlpha = 1;
+      g.strokeStyle = color; g.globalAlpha = .45; g.setLineDash([4, 3]); g.lineWidth = 1;
+      for (const arr of [up, bl]) { g.beginPath(); let st = false; T.forEach((t, i) => { if (!isFinite(arr[i])) return; st ? g.lineTo(X(t), Y(arr[i])) : g.moveTo(X(t), Y(arr[i])); st = true; }); g.stroke(); }
+      g.setLineDash([]); g.globalAlpha = 1;
+    }
+  }
+  // 柱狀（MACD 柱）
+  if (o.bars) {
+    const bw = Math.max(1, Math.min(8, pw / T.length * .6)), y0 = Y(0);
+    o.bars.forEach((v, i) => { if (!isFinite(v)) return; g.fillStyle = v >= 0 ? css("--up") : css("--down"); g.globalAlpha = .55; const y = Y(v); g.fillRect(X(T[i]) - bw / 2, Math.min(y, y0), bw, Math.max(1, Math.abs(y - y0))); });
+    g.globalAlpha = 1;
+  }
+  // 線
+  for (const s of (o.lines || [])) {
+    g.strokeStyle = s.color; g.lineWidth = s.w || 2; g.lineJoin = "round"; g.beginPath(); let st = false;
+    T.forEach((t, i) => { const v = s.v[i]; if (!isFinite(v)) { st = false; return; } st ? g.lineTo(X(t), Y(v)) : g.moveTo(X(t), Y(v)); st = true; });
+    g.stroke();
+  }
+  g.restore();
+  // 最新價標籤
+  if (o.tag) {
+    const v = o.tag.v, y = Math.max(PAD.t + 8, Math.min(PAD.t + ph - 8, Y(v))), s = fmt(v, o.tag.dec);
+    g.fillStyle = o.tag.color; const tw = g.measureText(s).width + 10;
+    g.beginPath(); g.roundRect ? g.roundRect(PAD.l + pw + 2, y - 9, tw, 18, 4) : g.rect(PAD.l + pw + 2, y - 9, tw, 18); g.fill();
+    g.fillStyle = "#fff"; g.textAlign = "left"; g.fillText(s, PAD.l + pw + 7, y);
+  }
+  // 十字線
+  if (hover >= 0 && hover < T.length) {
+    const x = Math.round(X(T[hover])) + .5; g.strokeStyle = muted; g.lineWidth = 1; g.beginPath(); g.moveTo(x, PAD.t); g.lineTo(x, PAD.t + ph); g.stroke();
+    for (const s of (o.lines || [])) { const v = s.v[hover]; if (!isFinite(v)) continue; g.beginPath(); g.arc(x, Y(v), 4, 0, Math.PI * 2); g.fillStyle = s.color; g.fill(); g.lineWidth = 2; g.strokeStyle = css("--surface"); g.stroke(); }
+  }
+  return { X, pw };
+}
+function spark(cv, v) {
+  const { g, w, h } = setup(cv); const f = v.filter(isFinite); if (f.length < 2) return;
+  const lo = Math.min(...f), hi = Math.max(...f), c = f[f.length - 1] >= f[0] ? css("--up") : css("--down");
+  g.strokeStyle = c; g.lineWidth = 1.5; g.lineJoin = "round"; g.beginPath();
+  f.forEach((x, i) => { const px = i / (f.length - 1) * (w - 2) + 1, py = h - 2 - (hi === lo ? .5 : (x - lo) / (hi - lo)) * (h - 4); i ? g.lineTo(px, py) : g.moveTo(px, py); });
+  g.stroke();
+}
+
+// ============ 畫面 ============
+function initUI() {
+  const opts = CODES.map(c => `<option value="${c}">${c} ${CUR[c]}</option>`).join("");
+  for (const id of ["selBase", "selQuote", "cvFrom", "cvTo"]) $(id).innerHTML = opts;
+  $("selBase").value = pref.base; $("selQuote").value = pref.quote;
+  $("cvFrom").value = "USD"; $("cvTo").value = "TWD";
+  $("ranges").innerHTML = RANGES.map(r => `<button class="btn" data-k="${r.k}" aria-pressed="${r.k === pref.range}">${r.label}</button>`).join("");
+  $("ranges").onclick = e => { const b = e.target.closest("button"); if (!b) return; pref.range = b.dataset.k; savePref(); [...$("ranges").children].forEach(x => x.setAttribute("aria-pressed", x === b)); render(); ensureData(false); };
+  $("selBase").onchange = () => setPair($("selBase").value, pref.quote);
+  $("selQuote").onchange = () => setPair(pref.base, $("selQuote").value);
+  $("btnSwap").onclick = () => setPair(pref.quote, pref.base);
+  for (const [id, k] of [["tSma20", "sma20"], ["tSma50", "sma50"], ["tBoll", "boll"]]) { $(id).checked = pref[k]; $(id).onchange = () => { pref[k] = $(id).checked; savePref(); drawAll(); }; }
+  $("btnRefresh").onclick = () => { failures = 0; ensureData(true); };
+  $("btnTheme").onclick = () => {
+    const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+    const cur = document.documentElement.dataset.theme || (dark ? "dark" : "light");
+    document.documentElement.dataset.theme = cur === "dark" ? "light" : "dark"; safeSet("fx-theme", document.documentElement.dataset.theme); render();
+  };
+  const th = safeGet("fx-theme"); if (th) document.documentElement.dataset.theme = th;
+  for (const id of ["cvAmt", "cvSpread", "cvFrom", "cvTo"]) $(id).oninput = renderConv;
+  $("btnCsv").onclick = exportCsv;
+  $("dataDetails").ontoggle = renderTable;
+  for (const id of ["cPrice", "cRsi", "cMacd"]) {
+    const cv = $(id);
+    const move = e => { if (!view || !view.geo) return; const r = cv.getBoundingClientRect(), x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left; hover = nearest(x); drawAll(); showTip(); };
+    cv.addEventListener("mousemove", move); cv.addEventListener("touchmove", move, { passive: true }); cv.addEventListener("touchstart", move, { passive: true });
+    cv.addEventListener("mouseleave", () => { hover = -1; drawAll(); showTip(); });
+  }
+  let rz; new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(render, 60); }).observe(document.querySelector(".main"));
+}
+function nearest(x) {
+  const { t } = view, { X } = view.geo; let lo = 0, hi = t.length - 1;
+  while (hi - lo > 1) { const m = (lo + hi) >> 1; if (X(t[m]) < x) lo = m; else hi = m; }
+  return Math.abs(X(t[lo]) - x) < Math.abs(X(t[hi]) - x) ? lo : hi;
+}
+function setPair(b, q) {
+  if (b === q) q = b === "TWD" ? "USD" : "TWD";
+  pref.base = b; pref.quote = q; savePref(); $("selBase").value = b; $("selQuote").value = q; hover = -1; render();
+}
+function savePref() { safeSet(PREF_KEY, pref); }
+
+function buildView() {
+  const range = RANGES.find(r => r.k === pref.range);
+  const end = latestDate ? tOf(latestDate) : Date.now();
+  const from = end - range.days * DAY;
+  const full = series(pref.base, pref.quote, from - (WARMUP * range.step * 1.45 + 5) * DAY, range.step);
+  const v = full.v, s20 = sma(v, 20), s50 = sma(v, 50), bb = boll(v, 20, 2), r = rsi(v, 14), m = macd(v);
+  const k = full.t.findIndex(t => t >= from); const cut = k < 0 ? full.t.length : k;
+  const sl = a => a.slice(cut);
+  return { range, full, t: sl(full.t), v: sl(v), s20: sl(s20), s50: sl(s50), bu: sl(bb.up), bl: sl(bb.lo), bm: sl(bb.mid), rsi: sl(r), ml: sl(m.line), ms: sl(m.sig), mh: sl(m.hist) };
+}
+function drawAll() {
+  if (!view) return;
+  const s1 = css("--s1"), s2 = css("--s2"), s3 = css("--s3"), last = view.v[view.v.length - 1];
+  const lines = [];
+  if (pref.sma50) lines.push({ v: view.s50, color: s3, w: 1.5 });
+  if (pref.sma20) lines.push({ v: view.s20, color: s2, w: 1.5 });
+  lines.push({ v: view.v, color: s1, w: 2 });
+  view.geo = drawChart($("cPrice"), { t: view.t, lines, band: pref.boll ? { up: view.bu, lo: view.bl, color: s1 } : null, xLabels: true, tag: isFinite(last) ? { v: last, color: s1 } : null });
+  drawChart($("cRsi"), { t: view.t, lines: [{ v: view.rsi, color: s1, w: 1.5 }], fixed: [0, 100], yTicks: [30, 50, 70], yDec: 0, refs: [30, 70] });
+  drawChart($("cMacd"), { t: view.t, lines: [{ v: view.ml, color: s1, w: 1.5 }, { v: view.ms, color: s2, w: 1.5 }], bars: view.mh, xLabels: true, small: true, refs: [0] });
+}
+function showTip() {
+  const tip = $("tip");
+  if (!view || hover < 0 || !view.geo) { tip.style.display = "none"; return; }
+  const i = hover, prev = i > 0 ? view.v[i - 1] : view.full.v[view.full.v.length - view.v.length - 1];
+  const ch = isFinite(prev) ? view.v[i] / prev - 1 : NaN;
+  const row = (c, k, val) => `<div class="r"><span>${c ? `<i style="--c:${c}"></i>` : ""}${k}</span><b>${val}</b></div>`;
+  tip.innerHTML = `<div class="d">${fmtDate(view.t[i])}</div>` +
+    row(css("--s1"), "價格", fmt(view.v[i])) +
+    `<div class="r"><span>漲跌</span><b class="${cls(ch)}">${arrow(ch)}${pct(ch)}</b></div>` +
+    (pref.sma20 ? row(css("--s2"), "SMA 20", fmt(view.s20[i])) : "") +
+    (pref.sma50 ? row(css("--s3"), "SMA 50", fmt(view.s50[i])) : "") +
+    (pref.boll ? row("", "布林上/下", `${fmt(view.bu[i])} / ${fmt(view.bl[i])}`) : "") +
+    row("", "RSI", fmt(view.rsi[i], 1)) + row("", "MACD 柱", fmt(view.mh[i], 5));
+  tip.style.display = "block";
+  const box = $("boxPrice").clientWidth, x = view.geo.X(view.t[i]), tw = tip.offsetWidth;
+  tip.style.left = (x + 14 + tw > box - PAD.r ? Math.max(0, x - tw - 14) : x + 14) + "px"; tip.style.top = "10px";
+}
+
+function renderQuote() {
+  const { v, t, full } = view, n = v.length, last = v[n - 1];
+  const prev = full.v.length >= 2 ? full.v[full.v.length - 2] : NaN, dch = last / prev - 1;
+  $("qPrice").textContent = fmt(last);
+  $("qChg").className = "chg num " + cls(dch);
+  $("qChg").textContent = isFinite(dch) ? `${arrow(dch)}${fmt(last - prev)}（${pct(dch)}）` : "";
+  $("qName").textContent = `1 ${CUR[pref.base]} = ? ${CUR[pref.quote]} · ${latestDate || ""}`;
+  document.title = `${pref.base}/${pref.quote} ${fmt(last)} · 外匯看盤分析`;
+  const rch = last / v[0] - 1, lr = logret(v), gap = n > 1 ? (t[n - 1] - t[0]) / DAY / (n - 1) : 1;
+  const mean = lr.reduce((a, b) => a + b, 0) / (lr.length || 1), sd = Math.sqrt(lr.reduce((a, b) => a + (b - mean) ** 2, 0) / Math.max(1, lr.length - 1));
+  const vol = sd * Math.sqrt(365 / gap);
+  let peak = -Infinity, mdd = 0; for (const x of v) { peak = Math.max(peak, x); mdd = Math.min(mdd, x / peak - 1); }
+  const hi = Math.max(...v), lo = Math.min(...v);
+  const tile = (k, val, c = "") => `<div class="tile"><div class="k">${k}</div><div class="v num ${c}">${val}</div></div>`;
+  $("tiles").innerHTML =
+    tile(`${view.range.label}漲跌`, arrow(rch) + pct(rch), cls(rch)) +
+    tile("區間最高", fmt(hi)) + tile("區間最低", fmt(lo)) +
+    tile("區間位置", isFinite((last - lo) / (hi - lo)) ? ((last - lo) / (hi - lo) * 100).toFixed(0) + "%" : "—") +
+    tile("年化波動率", isFinite(vol) ? (vol * 100).toFixed(2) + "%" : "—") +
+    tile("最大回檔", pct(mdd));
+  const r = view.range;
+  $("sampleNote").textContent = `共 ${n} 筆資料點${r.step > 1 && !fromLocalFile ? `，每 ${r.step} 天取樣一次（指標以「期」計算）` : ""}。滑鼠移到圖上可查看每日數值。`;
+}
+
+function renderSignals() {
+  const { v, s20, s50, rsi: R, ml, ms, mh, bu, bl } = view, n = v.length - 1, p = v[n];
+  const out = [];
+  const add = (name, score, tag, desc) => out.push({ name, score, tag, desc });
+  if (isFinite(s20[n])) add("價格 vs SMA20", p > s20[n] ? 1 : -1, p > s20[n] ? "偏多" : "偏空", `價格 ${fmt(p)} ${p > s20[n] ? "高於" : "低於"} 20 期均線 ${fmt(s20[n])}（乖離 ${pct(p / s20[n] - 1)}）`);
+  if (isFinite(s50[n]) && isFinite(s20[n])) {
+    let cross = ""; for (let i = n; i > Math.max(0, n - 10); i--) { if (!isFinite(s50[i - 1])) break; const a = s20[i] - s50[i], b = s20[i - 1] - s50[i - 1]; if (a > 0 && b <= 0) { cross = "近期出現黃金交叉"; break; } if (a < 0 && b >= 0) { cross = "近期出現死亡交叉"; break; } }
+    add("均線排列", s20[n] > s50[n] ? 1 : -1, s20[n] > s50[n] ? "偏多" : "偏空", `SMA20 ${s20[n] > s50[n] ? "在" : "跌破"} SMA50 ${s20[n] > s50[n] ? "之上（多頭排列）" : "（空頭排列）"}${cross ? "，" + cross : ""}`);
+  }
+  if (isFinite(R[n])) {
+    const r = R[n]; let sc = 0, tag = "中性", d = `RSI ${r.toFixed(1)}，`;
+    if (r >= 70) { sc = -1; tag = "超買"; d += "進入超買區，留意拉回"; } else if (r <= 30) { sc = 1; tag = "超賣"; d += "進入超賣區，留意反彈"; }
+    else { sc = r > 55 ? .5 : r < 45 ? -.5 : 0; tag = r > 55 ? "偏多" : r < 45 ? "偏空" : "中性"; d += r > 50 ? "動能偏強" : "動能偏弱"; }
+    add("RSI 相對強弱", sc, tag, d);
+  }
+  if (isFinite(ml[n]) && isFinite(ms[n])) {
+    const up = ml[n] > ms[n], grow = isFinite(mh[n - 1]) && Math.abs(mh[n]) > Math.abs(mh[n - 1]);
+    add("MACD", up ? 1 : -1, up ? "偏多" : "偏空", `MACD ${up ? "位於" : "低於"}訊號線，柱狀體${grow ? "擴大" : "收斂"}中${ml[n] > 0 ? "，位於零軸之上" : "，位於零軸之下"}`);
+  }
+  if (isFinite(bu[n])) {
+    const b = (p - bl[n]) / (bu[n] - bl[n]); let sc = 0, tag = "中性";
+    if (b > 1) { sc = -.5; tag = "突破上軌"; } else if (b < 0) { sc = .5; tag = "跌破下軌"; } else if (b > .8) tag = "近上軌"; else if (b < .2) tag = "近下軌";
+    add("布林通道", sc, tag, `%B = ${(b * 100).toFixed(0)}%，通道寬度 ${pct((bu[n] - bl[n]) / view.bm[n])}`);
+  }
+  const k = Math.max(0, n - 20); if (n > 5) { const roc = p / v[k] - 1; add("20 期動能", roc > 0.002 ? 1 : roc < -0.002 ? -1 : 0, roc > 0.002 ? "偏多" : roc < -0.002 ? "偏空" : "持平", `近 ${n - k} 期變動 ${pct(roc)}`); }
+  const tot = out.reduce((a, b) => a + b.score, 0), max = out.length || 1, norm = tot / max;
+  const verdict = norm > .35 ? "偏多" : norm < -.35 ? "偏空" : "盤整";
+  $("vText").textContent = verdict; $("vText").className = "big " + (verdict === "偏多" ? "up" : verdict === "偏空" ? "down" : "flat");
+  $("vMark").style.left = ((norm + 1) / 2 * 100) + "%";
+  $("sigPair").textContent = `${pref.base}/${pref.quote}`;
+  const c = s => s > 0 ? "up" : s < 0 ? "down" : "flat";
+  $("signals").innerHTML = out.map(s => `<li><span>${s.name}</span><span class="pill ${c(s.score)}">${s.score > 0 ? "▲ " : s.score < 0 ? "▼ " : "● "}${s.tag}</span><span class="desc num">${esc(s.desc)}</span></li>`).join("") || "<li>資料不足</li>";
+}
+
+function renderPerf() {
+  if (!latestDate) return;
+  const e = tOf(latestDate), last = rate(latestDate, pref.base, pref.quote);
+  const rows = [["1 週", 7], ["1 個月", 30], ["3 個月", 91], ["6 個月", 182], ["1 年", 365], ["今年以來", null]];
+  $("perf").innerHTML = "<tr><th>期間</th><th>起始匯價</th><th>漲跌幅</th></tr>" + rows.map(([k, b]) => {
+    const d = b === null ? iso(Date.UTC(new Date(e).getUTCFullYear(), 0, 1)) : iso(e - b * DAY);
+    const p0 = d < EARLIEST ? NaN : at(pref.base, pref.quote, d), ch = last / p0 - 1;
+    return `<tr><td>${k}</td><td>${fmt(p0)}</td><td class="${cls(ch)}">${arrow(ch)}${pct(ch)}</td></tr>`;
+  }).join("");
+}
+
+function renderStrength() {
+  const { t } = view; if (t.length < 2) return;
+  const d0 = iso(t[0]), d1 = iso(t[t.length - 1]), r0 = store.get(d0), r1 = store.get(d1);
+  const lc = BASKET.map(c => ({ c, x: r0 && r1 && r0[c] && r1[c] ? Math.log(r0[c] / r1[c]) : NaN })).filter(o => isFinite(o.x));
+  const m = lc.reduce((a, b) => a + b.x, 0) / (lc.length || 1);
+  lc.forEach(o => o.x -= m); lc.sort((a, b) => b.x - a.x);
+  const mx = Math.max(...lc.map(o => Math.abs(o.x)), 1e-9);
+  $("strRange").textContent = `${d0} → ${d1}`;
+  $("strength").innerHTML = lc.map(o => {
+    const w = Math.abs(o.x) / mx * 50;
+    return `<div class="row" title="${CUR[o.c]} ${pct(Math.expm1(o.x))}"><span>${o.c} <span class="note">${CUR[o.c]}</span></span><div class="track"><div class="bar ${o.x >= 0 ? "pos" : "neg"}" style="width:${w}%"></div></div><span class="val">${pct(Math.expm1(o.x))}</span></div>`;
+  }).join("");
+}
+
+function renderHeat() {
+  const { t } = view, rets = {};
+  for (const c of HEAT) {
+    const v = t.map(x => rate(iso(x), c, "TWD"));
+    rets[c] = logret(v);
+  }
+  const cols = HEAT.length + 1, box = $("heat");
+  box.style.gridTemplateColumns = `56px repeat(${HEAT.length}, minmax(0,1fr))`;
+  const pos = css("--div-pos"), neg = css("--div-neg"), mid = css("--div-mid"), ink = css("--ink");
+  let h = `<div class="h"></div>` + HEAT.map(c => `<div class="h">${c}</div>`).join("");
+  for (const a of HEAT) {
+    h += `<div class="h" style="text-align:left">${a}</div>`;
+    for (const b of HEAT) {
+      const r = a === b ? 1 : corr(rets[a], rets[b]);
+      const bg = isFinite(r) ? `color-mix(in oklab, ${r >= 0 ? pos : neg} ${Math.round(Math.abs(r) * 100)}%, ${mid})` : mid;
+      const fg = isFinite(r) && Math.abs(r) > .55 ? "#fff" : ink;
+      h += `<div style="background:${bg};color:${fg}" title="${a}/TWD 與 ${b}/TWD 相關係數 ${isFinite(r) ? r.toFixed(2) : "—"}">${isFinite(r) ? r.toFixed(2) : "—"}</div>`;
+    }
+  }
+  box.innerHTML = h;
+}
+
+function renderWatch() {
+  const ul = $("watch");
+  if (!view) return;
+  const from = view.t[0] || 0;
+  ul.innerHTML = WATCH.map(([b, q], i) => {
+    const s = series(b, q, from, view.range.step), n = s.v.length, last = s.v[n - 1], prev = s.v[n - 2], ch = last / prev - 1;
+    const cur = b === pref.base && q === pref.quote;
+    return `<li data-i="${i}" aria-current="${cur}" tabindex="0"><div><div class="nm">${b}/${q}</div><div class="sub">${CUR[b]}/${CUR[q]}</div></div><canvas></canvas><div class="px num"><div>${fmt(last)}</div><div class="${cls(ch)}" style="font-size:11px">${arrow(ch)}${pct(ch)}</div></div></li>`;
+  }).join("");
+  [...ul.children].forEach((li, i) => {
+    const [b, q] = WATCH[i]; spark(li.querySelector("canvas"), series(b, q, from, view.range.step).v);
+    li.onclick = () => setPair(b, q); li.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setPair(b, q); } };
+  });
+}
+
+function renderConv() {
+  if (!latestDate) return;
+  const a = parseFloat($("cvAmt").value), sp = (parseFloat($("cvSpread").value) || 0) / 100;
+  const f = $("cvFrom").value, t = $("cvTo").value, r = rate(latestDate, f, t);
+  if (!isFinite(a) || !isFinite(r)) { $("cvOut").textContent = "—"; $("cvNote").textContent = ""; return; }
+  const out = a * r;
+  $("cvOut").textContent = `${fmt(out, out >= 100 ? 0 : 2)} ${t}`;
+  $("cvNote").innerHTML = `中價 1 ${f} = ${fmt(r)} ${t}<br>含 ${(sp * 100).toFixed(2)}% 價差：付款約需 ${fmt(out * (1 + sp), out >= 100 ? 0 : 2)} ${t}・收款約得 ${fmt(out * (1 - sp), out >= 100 ? 0 : 2)} ${t}`;
+}
+
+function renderTable() {
+  if (!$("dataDetails").open || !view) return;
+  const { t, v } = view;
+  let h = `<tr><th>日期</th><th>${pref.base}/${pref.quote}</th><th>漲跌幅</th></tr>`;
+  for (let i = t.length - 1; i >= 0; i--) { const ch = i ? v[i] / v[i - 1] - 1 : NaN; h += `<tr><td>${fmtDate(t[i])}</td><td>${fmt(v[i])}</td><td class="${cls(ch)}">${pct(ch)}</td></tr>`; }
+  $("dataTable").innerHTML = h;
+}
+function exportCsv() {
+  if (!view) return;
+  const rows = [["date", `${pref.base}/${pref.quote}`, "SMA20", "SMA50", "RSI14", "MACD", "Signal"]];
+  view.t.forEach((t, i) => rows.push([iso(t), view.v[i], view.s20[i], view.s50[i], view.rsi[i], view.ml[i], view.ms[i]].map(x => typeof x === "number" ? (isFinite(x) ? +x.toPrecision(10) : "") : x)));
+  const blob = new Blob(["﻿" + rows.map(r => r.join(",")).join("\n")], { type: "text/csv" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `${pref.base}${pref.quote}_${pref.range}_${latestDate}.csv`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+function render() {
+  view = buildView();
+  const ok = view.v.length > 1;
+  $("banner").innerHTML = !ok && !loading ? `<div class="banner err">目前無法取得匯率資料。請確認網路連線後按「重新整理」，或先執行 <code>python3 collect.py</code> 產生本地資料檔。</div>`
+    : failures ? `<div class="banner">有 ${failures} 筆歷史資料下載失敗，圖表以已取得的資料繪製。</div>` : "";
+  $("status").innerHTML = latestDate ? `最新資料日期 <b>${latestDate}</b> · 已載入 ${store.size} 天${fromLocalFile ? `（本地檔 ${fromLocalFile} 天）` : ""}` : (loading ? "載入中…" : "尚無資料");
+  if (hover >= view.t.length) hover = -1;
+  if (ok) { renderQuote(); drawAll(); renderSignals(); renderPerf(); renderStrength(); renderHeat(); renderTable(); }
+  else drawAll();
+  renderWatch(); renderConv(); showTip();
+}
+
+(async function main() {
+  initUI();
+  loadCache();
+  await loadLocalFile();
+  if (store.size) { latestDate = [...store.keys()].sort().pop(); render(); }
+  await ensureData(true);
+})();
+</script>
+</body>
+</html>
