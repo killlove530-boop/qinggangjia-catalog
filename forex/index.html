@@ -173,6 +173,22 @@ footer { margin-top: 18px; font-size: 12px; color: var(--muted); }
 footer a { color: var(--ink-2); }
 details summary { cursor: pointer; font-weight: 600; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* 下單時機 */
+.sigtable td, .sigtable th { padding: 7px 6px; }
+.sigtable tbody tr { cursor: pointer; }
+.sigtable tbody tr:hover { background: var(--surface-2); }
+.sigtable .why { white-space: normal; color: var(--muted); font-size: 12px; text-align: left; min-width: 220px; }
+.warn { color: var(--muted); }
+.imp { display: grid; grid-template-columns: 92px 1fr 60px; gap: 8px; align-items: center; padding: 5px 0; font-size: 13px; }
+.imp .rng { position: relative; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--down), var(--div-mid), var(--up)); opacity: .85; }
+.imp .rng i { position: absolute; top: -4px; width: 4px; height: 16px; border-radius: 2px; background: var(--ink); transform: translateX(-2px); }
+.imp .lb { text-align: right; font-weight: 600; font-size: 12px; }
+.sess { list-style: none; margin: 0; padding: 0; }
+.sess li { padding: 7px 8px; border-radius: 8px; display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; }
+.sess li.now { background: var(--surface-2); box-shadow: inset 3px 0 0 var(--accent); }
+.sess .t { font-variant-numeric: tabular-nums; font-weight: 600; }
+.sess .n { grid-column: 1 / -1; color: var(--muted); font-size: 12px; }
 </style>
 </head>
 <body>
@@ -238,6 +254,30 @@ details summary { cursor: pointer; font-weight: 600; }
         <div class="chartbox"><canvas id="cMacd" role="img" aria-label="MACD 指標"></canvas><span class="chartlabel">MACD 12 / 26 / 9</span></div>
         <p class="note" id="sampleNote"></p>
       </section>
+
+      <section class="card" id="orderCard" hidden>
+        <h2>今日下單時機 <small id="orderDate"></small></h2>
+        <div class="tscroll" style="max-height:none">
+          <table class="num sigtable">
+            <thead><tr><th>匯率</th><th>建議</th><th>進場參考</th><th>停損</th><th>目標</th><th>回測勝率</th><th class="why">理由</th></tr></thead>
+            <tbody id="orderRows"></tbody>
+          </table>
+        </div>
+        <p class="note">依每日收盤中價計算，隔日參考。停損／目標為 2／3 倍日均波幅；回測勝率標 ⚠ 表示此規則在該匯率過去平均報酬為負，參考性低。點選列可切換走勢圖。</p>
+      </section>
+
+      <div class="grid2" id="orderExtra" hidden>
+        <section class="card">
+          <h2>進口付款換匯時機 <small>外幣兌新台幣・近一年位置</small></h2>
+          <div id="impRows"></div>
+          <p class="note">標記越靠左表示越接近一年低點（換外幣較划算）。有固定付款需求時，建議分批換匯降低風險。</p>
+        </section>
+        <section class="card">
+          <h2>適合下單的時段 <small id="sessNow"></small></h2>
+          <ul class="sess" id="sessRows"></ul>
+          <p class="note">台灣時間。重大經濟數據公布前後波動大，建議避開或縮小部位。</p>
+        </section>
+      </div>
 
       <div class="grid2">
         <section class="card">
@@ -798,10 +838,50 @@ function render() {
   renderWatch(); renderConv(); showTip();
 }
 
+
+// ============ 下單時機（由 analyze.py 產生 data/signals.json） ============
+async function loadSignals() {
+  let d;
+  try { const r = await fetch("data/signals.json", { cache: "no-cache" }); if (!r.ok) return; d = await r.json(); } catch (e) { return; }
+  const act = { long: "up", wait_long: "up", short: "down", wait_short: "down", none: "flat" };
+  const ico = { long: "▲ ", wait_long: "△ ", short: "▼ ", wait_short: "▽ ", none: "● " };
+  $("orderDate").textContent = `${d.date} 收盤分析`;
+  $("orderRows").innerHTML = d.signals.map((s, i) => {
+    const bt = s.backtest, wr = bt.winRate == null ? "—" : `${Math.round(bt.winRate * 100)}%（${bt.trades} 次）${s.reliable ? "" : " ⚠"}`;
+    const v = x => x == null ? "—" : fmt(x);
+    return `<tr data-i="${i}" tabindex="0"><td><b>${esc(s.pair)}</b><div class="note">${esc(s.name)}</div></td>
+      <td><span class="pill ${act[s.action]}">${ico[s.action]}${esc(s.label)}</span></td>
+      <td>${v(s.entry)}</td><td>${v(s.stop)}</td><td>${v(s.target)}</td>
+      <td class="${s.reliable ? "" : "warn"}">${wr}</td><td class="why">${esc(s.reasons.join("；"))}</td></tr>`;
+  }).join("");
+  [...$("orderRows").children].forEach(tr => {
+    const s = d.signals[+tr.dataset.i], go = () => { setPair(s.base, s.quote); window.scrollTo({ top: 0, behavior: "smooth" }); };
+    tr.onclick = go; tr.onkeydown = e => { if (e.key === "Enter") go(); };
+  });
+  $("impRows").innerHTML = d.import.map(m => {
+    const c = m.label === "相對便宜" ? "down" : m.label === "偏貴" ? "up" : "flat";
+    return `<div class="imp" title="${esc(m.tip)}"><span><b>${esc(m.cur)}</b> <span class="note">${esc(m.name)}</span></span>
+      <div><div class="rng"><i style="left:${(m.pct * 100).toFixed(1)}%"></i></div><div class="note num" style="display:flex;justify-content:space-between"><span>${fmt(m.low)}</span><span>現 ${fmt(m.price)}</span><span>${fmt(m.high)}</span></div></div>
+      <span class="lb ${c}">${esc(m.label)}</span></div>`;
+  }).join("");
+  // 目前台灣時間落在哪個時段
+  const tw = new Date(Date.now() + 8 * 3600e3), hm = tw.getUTCHours() * 60 + tw.getUTCMinutes(), mo = tw.getUTCMonth() + 1;
+  const summer = mo >= 4 && mo <= 10 || (mo === 3 && tw.getUTCDate() >= 10) || (mo === 11 && tw.getUTCDate() < 3);
+  const inRange = r => { const [a, b] = r.split("–").map(x => { const [h, m] = x.split(":"); return +h * 60 + +m; }); return a < b ? hm >= a && hm < b : hm >= a || hm < b; };
+  const wk = tw.getUTCDay(), closed = wk === 0 || (wk === 6 && hm >= 360) || (wk === 1 && hm < 360);
+  $("sessNow").textContent = `現在 ${String(tw.getUTCHours()).padStart(2, "0")}:${String(tw.getUTCMinutes()).padStart(2, "0")}（${summer ? "夏令" : "冬令"}）${closed ? "・週末休市" : ""}`;
+  $("sessRows").innerHTML = d.sessions.map(x => {
+    const r = summer ? x.summer : x.winter, now = !closed && inRange(r);
+    return `<li class="${now ? "now" : ""}"><span>${esc(x.name)}${now ? " ・進行中" : ""}</span><span class="t">${r}</span><span class="n">${esc(x.note)}</span></li>`;
+  }).join("");
+  $("orderCard").hidden = false; $("orderExtra").hidden = false;
+}
+
 (async function main() {
   initUI();
   loadCache();
   await loadLocalFile();
+  loadSignals();
   if (store.size) { latestDate = [...store.keys()].sort().pop(); render(); }
   await ensureData(true);
 })();

@@ -1,0 +1,473 @@
+{
+ "date": "2026-09-28",
+ "from": "2024-09-30",
+ "generated": "2026-09-29T08:08:50+00:00",
+ "rules": {
+  "stopAtr": 2.0,
+  "targetAtr": 3.0,
+  "maxHold": 20
+ },
+ "signals": [
+  {
+   "pair": "USD/TWD",
+   "base": "USD",
+   "quote": "TWD",
+   "name": "美元/新台幣",
+   "date": "2026-09-28",
+   "price": 31.772,
+   "action": "wait_short",
+   "label": "偏空・等反彈掛賣",
+   "reasons": [
+    "下降趨勢中，尚未出現新的進場轉折",
+    "價格已反彈到 SMA20 之上，可於現價附近分批賣出"
+   ],
+   "entry": 31.772,
+   "stop": 31.896,
+   "target": 31.586,
+   "rsi": 49.3,
+   "atrPct": 0.00195,
+   "backtest": {
+    "trades": 12,
+    "winRate": 0.333,
+    "avgReturn": -0.00132,
+    "totalReturn": -0.01597
+   },
+   "reliable": false
+  },
+  {
+   "pair": "EUR/TWD",
+   "base": "EUR",
+   "quote": "TWD",
+   "name": "歐元/新台幣",
+   "date": "2026-09-28",
+   "price": 36.185,
+   "action": "wait_short",
+   "label": "偏空・等反彈掛賣",
+   "reasons": [
+    "下降趨勢中，尚未出現新的進場轉折",
+    "RSI 28 超賣，不宜追空",
+    "建議反彈至 36.238（SMA20 附近）再掛單賣出"
+   ],
+   "entry": 36.238,
+   "stop": 36.345,
+   "target": 36.078,
+   "rsi": 28.1,
+   "atrPct": 0.00148,
+   "backtest": {
+    "trades": 15,
+    "winRate": 0.333,
+    "avgReturn": -0.00199,
+    "totalReturn": -0.03011
+   },
+   "reliable": false
+  },
+  {
+   "pair": "JPY/TWD",
+   "base": "JPY",
+   "quote": "TWD",
+   "name": "日圓/新台幣",
+   "date": "2026-09-28",
+   "price": 0.201421,
+   "action": "none",
+   "label": "觀望",
+   "reasons": [
+    "均線糾結、方向不明"
+   ],
+   "entry": null,
+   "stop": null,
+   "target": null,
+   "rsi": 46.6,
+   "atrPct": 0.00292,
+   "backtest": {
+    "trades": 11,
+    "winRate": 0.545,
+    "avgReturn": 0.00251,
+    "totalReturn": 0.02689
+   },
+   "reliable": true
+  },
+  {
+   "pair": "CNY/TWD",
+   "base": "CNY",
+   "quote": "TWD",
+   "name": "人民幣/新台幣",
+   "date": "2026-09-28",
+   "price": 4.7325,
+   "action": "wait_short",
+   "label": "偏空・等反彈掛賣",
+   "reasons": [
+    "下降趨勢中，尚未出現新的進場轉折",
+    "價格已反彈到 SMA20 之上，可於現價附近分批賣出"
+   ],
+   "entry": 4.7325,
+   "stop": 4.7504,
+   "target": 4.7057,
+   "rsi": 50.1,
+   "atrPct": 0.00189,
+   "backtest": {
+    "trades": 11,
+    "winRate": 0.636,
+    "avgReturn": 0.00299,
+    "totalReturn": 0.03312
+   },
+   "reliable": true
+  },
+  {
+   "pair": "GBP/TWD",
+   "base": "GBP",
+   "quote": "TWD",
+   "name": "英鎊/新台幣",
+   "date": "2026-09-28",
+   "price": 42.084,
+   "action": "wait_short",
+   "label": "偏空・等反彈掛賣",
+   "reasons": [
+    "下降趨勢中，尚未出現新的進場轉折",
+    "RSI 29 超賣，不宜追空",
+    "建議反彈至 42.176（SMA20 附近）再掛單賣出"
+   ],
+   "entry": 42.176,
+   "stop": 42.36,
+   "target": 41.9,
+   "rsi": 29.5,
+   "atrPct": 0.00218,
+   "backtest": {
+    "trades": 13,
+    "winRate": 0.231,
+    "avgReturn": -0.00491,
+    "totalReturn": -0.06247
+   },
+   "reliable": false
+  },
+  {
+   "pair": "HKD/TWD",
+   "base": "HKD",
+   "quote": "TWD",
+   "name": "港幣/新台幣",
+   "date": "2026-09-28",
+   "price": 4.0505,
+   "action": "wait_short",
+   "label": "偏空・等反彈掛賣",
+   "reasons": [
+    "下降趨勢中，尚未出現新的進場轉折",
+    "價格已反彈到 SMA20 之上，可於現價附近分批賣出"
+   ],
+   "entry": 4.0505,
+   "stop": 4.0663,
+   "target": 4.0269,
+   "rsi": 49.0,
+   "atrPct": 0.00195,
+   "backtest": {
+    "trades": 12,
+    "winRate": 0.25,
+    "avgReturn": -0.00169,
+    "totalReturn": -0.02031
+   },
+   "reliable": false
+  },
+  {
+   "pair": "AUD/TWD",
+   "base": "AUD",
+   "quote": "TWD",
+   "name": "澳幣/新台幣",
+   "date": "2026-09-28",
+   "price": 22.329,
+   "action": "wait_short",
+   "label": "偏空・等反彈掛賣",
+   "reasons": [
+    "下降趨勢中，尚未出現新的進場轉折",
+    "建議反彈至 22.381（SMA20 附近）再掛單賣出"
+   ],
+   "entry": 22.381,
+   "stop": 22.483,
+   "target": 22.226,
+   "rsi": 31.5,
+   "atrPct": 0.0023,
+   "backtest": {
+    "trades": 14,
+    "winRate": 0.5,
+    "avgReturn": 0.00421,
+    "totalReturn": 0.05833
+   },
+   "reliable": true
+  },
+  {
+   "pair": "EUR/USD",
+   "base": "EUR",
+   "quote": "USD",
+   "name": "歐元/美元",
+   "date": "2026-09-28",
+   "price": 1.1389,
+   "action": "wait_short",
+   "label": "偏空・等反彈掛賣",
+   "reasons": [
+    "下降趨勢中，尚未出現新的進場轉折",
+    "建議反彈至 1.1416（SMA20 附近）再掛單賣出"
+   ],
+   "entry": 1.1416,
+   "stop": 1.1469,
+   "target": 1.1336,
+   "rsi": 30.8,
+   "atrPct": 0.00233,
+   "backtest": {
+    "trades": 17,
+    "winRate": 0.412,
+    "avgReturn": 0.00183,
+    "totalReturn": 0.02995
+   },
+   "reliable": true
+  },
+  {
+   "pair": "USD/JPY",
+   "base": "USD",
+   "quote": "JPY",
+   "name": "美元/日圓",
+   "date": "2026-09-28",
+   "price": 157.737,
+   "action": "wait_short",
+   "label": "偏空・等反彈掛賣",
+   "reasons": [
+    "下降趨勢中，尚未出現新的進場轉折",
+    "價格已反彈到 SMA20 之上，可於現價附近分批賣出"
+   ],
+   "entry": 157.737,
+   "stop": 158.642,
+   "target": 156.38,
+   "rsi": 52.9,
+   "atrPct": 0.00287,
+   "backtest": {
+    "trades": 16,
+    "winRate": 0.562,
+    "avgReturn": 0.0037,
+    "totalReturn": 0.05868
+   },
+   "reliable": true
+  },
+  {
+   "pair": "GBP/USD",
+   "base": "GBP",
+   "quote": "USD",
+   "name": "英鎊/美元",
+   "date": "2026-09-28",
+   "price": 1.3246,
+   "action": "wait_short",
+   "label": "偏空・等反彈掛賣",
+   "reasons": [
+    "下降趨勢中，尚未出現新的進場轉折",
+    "RSI 28 超賣，不宜追空",
+    "建議反彈至 1.3276（SMA20 附近）再掛單賣出"
+   ],
+   "entry": 1.3276,
+   "stop": 1.3336,
+   "target": 1.3186,
+   "rsi": 28.0,
+   "atrPct": 0.00226,
+   "backtest": {
+    "trades": 11,
+    "winRate": 0.455,
+    "avgReturn": -0.00016,
+    "totalReturn": -0.00239
+   },
+   "reliable": false
+  },
+  {
+   "pair": "USD/CNY",
+   "base": "USD",
+   "quote": "CNY",
+   "name": "美元/人民幣",
+   "date": "2026-09-28",
+   "price": 6.7135,
+   "action": "wait_short",
+   "label": "偏空・等反彈掛賣",
+   "reasons": [
+    "下降趨勢中，尚未出現新的進場轉折",
+    "價格已反彈到 SMA20 之上，可於現價附近分批賣出"
+   ],
+   "entry": 6.7135,
+   "stop": 6.7202,
+   "target": 6.7034,
+   "rsi": 46.4,
+   "atrPct": 0.0005,
+   "backtest": {
+    "trades": 12,
+    "winRate": 0.333,
+    "avgReturn": -0.00114,
+    "totalReturn": -0.01367
+   },
+   "reliable": false
+  },
+  {
+   "pair": "XAU/USD",
+   "base": "XAU",
+   "quote": "USD",
+   "name": "黃金/美元",
+   "date": "2026-09-28",
+   "price": 4198.34,
+   "action": "none",
+   "label": "觀望",
+   "reasons": [
+    "均線糾結、方向不明"
+   ],
+   "entry": null,
+   "stop": null,
+   "target": null,
+   "rsi": 38.4,
+   "atrPct": 0.00967,
+   "backtest": {
+    "trades": 14,
+    "winRate": 0.714,
+    "avgReturn": 0.01716,
+    "totalReturn": 0.26279
+   },
+   "reliable": true
+  }
+ ],
+ "import": [
+  {
+   "cur": "USD",
+   "name": "美元",
+   "price": 31.772,
+   "low": 30.565,
+   "high": 32.455,
+   "avg": 31.599,
+   "pct": 0.638,
+   "rsi": 49.3,
+   "label": "普通",
+   "tip": "位於區間中段，依付款時程分批換匯、降低匯率風險"
+  },
+  {
+   "cur": "EUR",
+   "name": "歐元",
+   "price": 36.185,
+   "low": 35.491,
+   "high": 37.584,
+   "avg": 36.716,
+   "pct": 0.331,
+   "rsi": 28.1,
+   "label": "普通",
+   "tip": "位於區間中段，依付款時程分批換匯、降低匯率風險"
+  },
+  {
+   "cur": "JPY",
+   "name": "日圓",
+   "price": 0.201421,
+   "low": 0.195802,
+   "high": 0.206598,
+   "avg": 0.20049,
+   "pct": 0.52,
+   "rsi": 46.6,
+   "label": "普通",
+   "tip": "位於區間中段，依付款時程分批換匯、降低匯率風險"
+  },
+  {
+   "cur": "CNY",
+   "name": "人民幣",
+   "price": 4.7325,
+   "low": 4.295,
+   "high": 4.803,
+   "avg": 4.5923,
+   "pct": 0.861,
+   "rsi": 50.1,
+   "label": "偏貴",
+   "tip": "匯價在近一年高檔，非急需付款可等待拉回再換"
+  },
+  {
+   "cur": "GBP",
+   "name": "英鎊",
+   "price": 42.084,
+   "low": 40.349,
+   "high": 43.611,
+   "avg": 42.382,
+   "pct": 0.532,
+   "rsi": 29.5,
+   "label": "普通",
+   "tip": "位於區間中段，依付款時程分批換匯、降低匯率風險"
+  },
+  {
+   "cur": "AUD",
+   "name": "澳幣",
+   "price": 22.329,
+   "low": 19.858,
+   "high": 22.868,
+   "avg": 21.894,
+   "pct": 0.821,
+   "rsi": 31.5,
+   "label": "偏貴",
+   "tip": "匯價在近一年高檔，非急需付款可等待拉回再換"
+  },
+  {
+   "cur": "HKD",
+   "name": "港幣",
+   "price": 4.0505,
+   "low": 3.934,
+   "high": 4.1383,
+   "avg": 4.0419,
+   "pct": 0.57,
+   "rsi": 49.0,
+   "label": "普通",
+   "tip": "位於區間中段，依付款時程分批換匯、降低匯率風險"
+  },
+  {
+   "cur": "SGD",
+   "name": "新加坡幣",
+   "price": 24.864,
+   "low": 23.614,
+   "high": 25.236,
+   "avg": 24.633,
+   "pct": 0.771,
+   "rsi": 42.5,
+   "label": "偏貴",
+   "tip": "匯價在近一年高檔，非急需付款可等待拉回再換"
+  },
+  {
+   "cur": "KRW",
+   "name": "韓元",
+   "price": 0.023395,
+   "low": 0.020413,
+   "high": 0.023593,
+   "avg": 0.021649,
+   "pct": 0.938,
+   "rsi": 57.9,
+   "label": "偏貴",
+   "tip": "匯價在近一年高檔，非急需付款可等待拉回再換"
+  },
+  {
+   "cur": "CHF",
+   "name": "瑞士法郎",
+   "price": 38.308,
+   "low": 38.162,
+   "high": 41.165,
+   "avg": 39.706,
+   "pct": 0.049,
+   "rsi": 24.9,
+   "label": "相對便宜",
+   "tip": "匯價在近一年低檔，有外幣付款需求可提前分批買進"
+  }
+ ],
+ "sessions": [
+  {
+   "name": "亞洲盤（東京、台北、香港、新加坡）",
+   "summer": "08:00–16:00",
+   "winter": "08:00–16:00",
+   "note": "新台幣、日圓、人民幣主要交易時段；台北外匯市場 09:00–16:00，銀行牌告在此時段更新最頻繁"
+  },
+  {
+   "name": "歐洲盤（倫敦）",
+   "summer": "15:00–23:30",
+   "winter": "16:00–00:30",
+   "note": "歐元、英鎊、瑞士法郎成交量最大"
+  },
+  {
+   "name": "美洲盤（紐約）",
+   "summer": "20:00–05:00",
+   "winter": "21:00–06:00",
+   "note": "美國經濟數據常於 20:30（夏令）／21:30（冬令）公布，波動加劇"
+  },
+  {
+   "name": "歐美重疊時段（流動性最佳）",
+   "summer": "20:00–23:30",
+   "winter": "21:00–00:30",
+   "note": "點差最小、成交最活絡，主要貨幣對最適合下單的時段"
+  }
+ ]
+}

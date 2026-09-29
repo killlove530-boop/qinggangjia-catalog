@@ -12,6 +12,9 @@
 - **貨幣強弱**：十種主要貨幣相對強弱排行
 - **兌新台幣相關性熱圖**
 - **換匯試算**：可設定銀行價差，估算進口採購付款金額
+- **今日下單時機**：每個匯率的建議（買進／賣出／等回檔掛單／觀望）、進場參考價、停損、目標價與歷史回測勝率
+- **進口付款換匯時機**：外幣兌新台幣在近一年的高低位置（相對便宜／普通／偏貴）
+- **適合下單的時段**：亞洲、歐洲、美洲盤與歐美重疊時段（台灣時間），標示目前所在時段
 - **歷史資料表 / 下載 CSV**
 - 20 種貨幣（含黃金 XAU），任意兩種可組成交叉匯率；支援 1 月～2 年區間、深淺色、手機版面
 
@@ -21,7 +24,19 @@ python3 forex/collect.py            # 下載近 365 天每日匯率
 python3 forex/collect.py --days 730 # 回補兩年
 ```
 產生 `forex/data/rates.json`（網頁優先讀取）與 `forex/data/rates.csv`（可用 Excel 開啟）。
-`.github/workflows/forex-collect.yml` 會每天台灣時間 09:17 自動收集並提交。
+## 每日分析
+```bash
+python3 forex/analyze.py
+```
+產生 `forex/data/signals.json`（網頁「今日下單時機」讀取）與 `forex/data/report.md`（每日分析報告，可在 GitHub 直接閱讀）。
+
+訊號規則：
+- **買進**：SMA20 在 SMA50 之上、價格站上 SMA50，MACD 柱近 3 日由負轉正，RSI < 70
+- **賣出**：條件相反
+- **等回檔／反彈掛單**：趨勢成立但尚無轉折，建議在 SMA20 附近掛限價單
+- **停損／目標**：2 倍／3 倍日均波幅，最多持有 20 個交易日；回測不含點差與手續費
+
+`.github/workflows/forex-collect.yml` 會每天台灣時間 09:17 自動收集、分析並提交。
 
 資料來源：[fawazahmed0/exchange-api](https://github.com/fawazahmed0/exchange-api)（每日國際中價，最早至 2024-03-02）。
 僅供參考，不構成投資建議；實際換匯以銀行牌告為準。
