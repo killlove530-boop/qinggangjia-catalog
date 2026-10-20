@@ -1,0 +1,9 @@
+{
+  "start": "2026-10-20",
+  "capital": 1000000,
+  "riskPct": 0.01,
+  "maxOpen": 5,
+  "onlyReliable": true,
+  "breakevenAtr": 1.0,
+  "minHistoryTrades": 5
+}

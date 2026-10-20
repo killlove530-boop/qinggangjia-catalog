@@ -266,6 +266,23 @@ details summary { cursor: pointer; font-weight: 600; }
         <p class="note">依每日收盤中價計算，隔日參考。停損／目標為 2／3 倍日均波幅；回測勝率標 ⚠ 表示此規則在該匯率過去平均報酬為負，參考性低。點選列可切換走勢圖。</p>
       </section>
 
+      <section class="card" id="botCard" hidden>
+        <h2>自動交易（模擬帳戶） <small id="botDate"></small></h2>
+        <div class="toolbar" style="margin-bottom:10px">
+          <div class="grp" id="botTabs" role="group" aria-label="帳戶">
+            <button class="btn" data-k="live" aria-pressed="true">模擬帳戶</button>
+            <button class="btn" data-k="history" aria-pressed="false">歷史模擬</button>
+          </div>
+        </div>
+        <div class="tiles" id="botTiles"></div>
+        <div class="chartbox"><canvas id="cBot" style="height:180px" role="img" aria-label="模擬帳戶權益曲線"></canvas><span class="chartlabel">權益曲線（新台幣）</span></div>
+        <h2 style="margin-top:12px">持倉</h2>
+        <div class="tscroll" style="max-height:none"><table class="num" id="botOpen"></table></div>
+        <h2 style="margin-top:12px">最近平倉</h2>
+        <div class="tscroll" style="max-height:300px"><table class="num" id="botClosed"></table></div>
+        <p class="note">每日收盤後依「今日下單時機」的買進／賣出訊號自動進出場：每筆最多虧損帳戶 1%，獲利達 1 倍日均波幅後停損移到保本，觸及目標停利。以收盤價模擬成交並扣估計點差，不連接券商、不動用真實資金。歷史模擬只用當時已知資料判斷；過去表現不代表未來。</p>
+      </section>
+
       <div class="grid2" id="orderExtra" hidden>
         <section class="card">
           <h2>進口付款換匯時機 <small>外幣兌新台幣・近一年位置</small></h2>
@@ -835,9 +852,34 @@ function render() {
   if (hover >= view.t.length) hover = -1;
   if (ok) { renderQuote(); drawAll(); renderSignals(); renderPerf(); renderStrength(); renderHeat(); renderTable(); }
   else drawAll();
-  renderWatch(); renderConv(); showTip();
+  renderWatch(); renderConv(); showTip(); renderBot();
 }
 
+
+// ============ 自動交易（模擬帳戶，由 trader.py 產生 data/trades.json） ============
+let bot = null, botKey = "live";
+async function loadBot() {
+  try { const r = await fetch("data/trades.json", { cache: "no-cache" }); if (!r.ok) return; bot = await r.json(); } catch (e) { return; }
+  $("botDate").textContent = `${bot.date} 收盤`;
+  $("botTabs").onclick = e => { const b = e.target.closest("button"); if (!b) return; botKey = b.dataset.k; [...$("botTabs").children].forEach(x => x.setAttribute("aria-pressed", x === b)); renderBot(); };
+  $("botCard").hidden = false; renderBot();
+}
+function renderBot() {
+  if (!bot) return;
+  const a = bot[botKey], money = x => Math.round(x).toLocaleString("zh-TW");
+  const tile = (k, v, c = "") => `<div class="tile"><div class="k">${k}</div><div class="v num ${c}">${v}</div></div>`;
+  $("botTiles").innerHTML = tile("目前權益", money(a.equityWithOpen)) + tile("報酬率", arrow(a.returnPct) + pct(a.returnPct), cls(a.returnPct)) +
+    tile("已平倉", `${a.trades} 筆`) + tile("勝率", a.winRate == null ? "—" : Math.round(a.winRate * 100) + "%") +
+    tile("最大回檔", pct(a.maxDrawdown)) + tile("起始", `${a.start}`);
+  const cv = a.curve.length > 1 ? a.curve : [[a.start, a.capital], [bot.date, a.equityWithOpen]];
+  drawChart($("cBot"), { t: cv.map(x => tOf(x[0])), lines: [{ v: cv.map(x => x[1]), color: css("--s1"), w: 2 }], refs: [a.capital], xLabels: true, yDec: 0 });
+  $("botOpen").innerHTML = a.open.length ? "<tr><th>匯率</th><th>方向</th><th>進場</th><th>停損</th><th>目標</th><th>現價</th><th>未實現</th></tr>" + a.open.map(p =>
+    `<tr><td><b>${esc(p.pair)}</b></td><td class="${p.dir === "買進" ? "up" : "down"}">${esc(p.dir)}</td><td>${esc(p.openDate)}<div class="note">@ ${fmt(p.entry)}</div></td><td>${fmt(p.stop)}${p.breakeven ? '<div class="note">保本</div>' : ""}</td><td>${fmt(p.target)}</td><td>${fmt(p.last)}</td><td class="${cls(p.unrealized)}">${money(p.unrealized)}</td></tr>`).join("")
+    : `<tr><td class="note">目前沒有持倉${botKey === "live" ? "，等待下一個買進／賣出訊號" : ""}</td></tr>`;
+  $("botClosed").innerHTML = a.closed.length ? "<tr><th>匯率</th><th>方向</th><th>進場</th><th>出場</th><th>原因</th><th>R</th><th>損益</th></tr>" + a.closed.slice(0, 40).map(t =>
+    `<tr><td><b>${esc(t.pair)}</b></td><td>${esc(t.dir)}</td><td>${esc(t.openDate)}<div class="note">@ ${fmt(t.entry)}</div></td><td>${esc(t.closeDate)}<div class="note">@ ${fmt(t.exit)}</div></td><td>${esc(t.reason)}</td><td class="${cls(t.r)}">${t.r > 0 ? "+" : ""}${t.r.toFixed(2)}</td><td class="${cls(t.pnl)}">${money(t.pnl)}</td></tr>`).join("")
+    : `<tr><td class="note">尚無平倉紀錄</td></tr>`;
+}
 
 // ============ 下單時機（由 analyze.py 產生 data/signals.json） ============
 async function loadSignals() {
@@ -882,6 +924,7 @@ async function loadSignals() {
   loadCache();
   await loadLocalFile();
   loadSignals();
+  loadBot();
   if (store.size) { latestDate = [...store.keys()].sort().pop(); render(); }
   await ensureData(true);
 })();

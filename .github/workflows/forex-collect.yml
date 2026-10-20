@@ -1,4 +1,4 @@
-name: 外匯資料每日收集與分析
+name: 外匯資料每日收集、分析與模擬交易
 
 on:
   schedule:
@@ -24,6 +24,8 @@ jobs:
         run: python3 forex/collect.py --days "${{ github.event.inputs.days || '365' }}"
       - name: 每日分析（下單時機）
         run: python3 forex/analyze.py
+      - name: 自動交易（模擬帳戶）
+        run: python3 forex/trader.py
       - name: 提交資料
         run: |
           git config user.name "forex-bot"
