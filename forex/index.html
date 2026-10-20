@@ -860,7 +860,7 @@ function render() {
 let bot = null, botKey = "live";
 async function loadBot() {
   try { const r = await fetch("data/trades.json", { cache: "no-cache" }); if (!r.ok) return; bot = await r.json(); } catch (e) { return; }
-  const ex = (bot.config && bot.config.excludeCurrencies) || [];
+  const ex = [...((bot.config && bot.config.excludeCurrencies) || []), ...((bot.config && bot.config.excludePairs) || [])];
   $("botDate").textContent = `${bot.date} 收盤${ex.length ? `・不交易含 ${ex.join("、")} 的匯率` : ""}`;
   $("botTabs").onclick = e => { const b = e.target.closest("button"); if (!b) return; botKey = b.dataset.k; [...$("botTabs").children].forEach(x => x.setAttribute("aria-pressed", x === b)); renderBot(); };
   $("botCard").hidden = false; renderBot();
