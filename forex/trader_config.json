@@ -5,5 +5,8 @@
   "maxOpen": 5,
   "onlyReliable": true,
   "breakevenAtr": 1.0,
-  "minHistoryTrades": 5
+  "minHistoryTrades": 5,
+  "excludeCurrencies": [
+    "TWD"
+  ]
 }
