@@ -11,6 +11,7 @@
 規則：
   進場：出現「買進訊號／賣出訊號」，且（onlyReliable 時）該匯率截至當日的回測平均報酬為正
   部位：每筆最多虧損帳戶的 riskPct（預設 1%），依停損距離換算部位大小
+  排除：excludeCurrencies 中的貨幣（例如 TWD，因銀行換匯點差高）不交易
   出場：收盤觸及目標價（停利）／停損價、反向訊號、持有超過 20 個交易日；
         獲利達 breakevenAtr 倍日均波幅後，停損移到進場價（保本）
   成本：依匯率類型扣除估計點差
@@ -38,6 +39,7 @@ DEFAULTS = {
     "onlyReliable": True,      # 只交易回測平均報酬為正的匯率
     "breakevenAtr": 1.0,       # 獲利達幾倍日均波幅後移到保本停損
     "minHistoryTrades": 5,     # 判斷可靠性至少需要的歷史交易次數
+    "excludeCurrencies": [],   # 不交易含這些貨幣的匯率，例如 ["TWD"]
 }
 # 估計單邊交易成本（占價格比例）
 COST = {"TWD": 0.0010, "XAU": 0.0005}
@@ -66,9 +68,11 @@ def twd_per(rates_day, cur):
 class Market:
     """每個匯率的價格序列與指標，依日期查詢。"""
 
-    def __init__(self, days, rates):
+    def __init__(self, days, rates, exclude=()):
         self.days, self.rates, self.pairs = days, rates, {}
         for b, q in A.PAIRS:
+            if b in exclude or q in exclude:
+                continue
             ds, v = A.pair_series(days, rates, b, q)
             if len(v) >= 60:
                 self.pairs[(b, q)] = {"ds": ds, "v": v, "idx": {d: i for i, d in enumerate(ds)},
@@ -220,7 +224,7 @@ def main():
     if len(days) < 60:
         print("資料不足，請先執行 collect.py", file=sys.stderr)
         return 1
-    mkt = Market(days, rates)
+    mkt = Market(days, rates, set(cfg["excludeCurrencies"]))
     out = {
         "generated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "date": days[-1], "config": cfg,
