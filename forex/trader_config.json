@@ -8,5 +8,8 @@
   "minHistoryTrades": 5,
   "excludeCurrencies": [
     "TWD"
+  ],
+  "excludePairs": [
+    "EUR/USD"
   ]
 }
