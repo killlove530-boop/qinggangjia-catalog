@@ -1,6 +1,6 @@
 {
- "generated": "2026-10-23T06:03:59+00:00",
- "date": "2026-10-22",
+ "generated": "2026-10-24T05:56:56+00:00",
+ "date": "2026-10-23",
  "config": {
   "start": "2026-10-20",
   "capital": 1000000,
@@ -20,12 +20,30 @@
   "start": "2026-10-20",
   "capital": 1000000,
   "equity": 1000000,
-  "equityWithOpen": 1000000,
-  "returnPct": 0.0,
+  "equityWithOpen": 999999,
+  "returnPct": -0.0,
   "trades": 0,
   "winRate": null,
-  "maxDrawdown": 0.0,
-  "open": [],
+  "maxDrawdown": -0.0,
+  "open": [
+   {
+    "pair": "XAU/USD",
+    "dir": "賣出",
+    "openDate": "2026-10-23",
+    "entry": 4010.3,
+    "stop": 4062.97,
+    "target": 3931.31,
+    "last": 4010.3,
+    "units": 6,
+    "breakeven": false,
+    "unrealized": -1,
+    "why": [
+     "下降趨勢（SMA20 在 SMA50 之下）",
+     "MACD 柱轉負（動能轉弱）",
+     "RSI 30 未超賣"
+    ]
+   }
+  ],
   "closed": [],
   "curve": [
    [
@@ -39,6 +57,10 @@
    [
     "2026-10-22",
     1000000
+   ],
+   [
+    "2026-10-23",
+    999999
    ]
   ]
  },
@@ -51,7 +73,25 @@
   "trades": 22,
   "winRate": 0.545,
   "maxDrawdown": -0.09726,
-  "open": [],
+  "open": [
+   {
+    "pair": "XAU/USD",
+    "dir": "賣出",
+    "openDate": "2026-10-23",
+    "entry": 4010.3,
+    "stop": 4062.97,
+    "target": 3931.31,
+    "last": 4010.3,
+    "units": 6,
+    "breakeven": false,
+    "unrealized": -1,
+    "why": [
+     "下降趨勢（SMA20 在 SMA50 之下）",
+     "MACD 柱轉負（動能轉弱）",
+     "RSI 30 未超賣"
+    ]
+   }
+  ],
   "closed": [
    {
     "pair": "USD/JPY",
@@ -2491,6 +2531,10 @@
    ],
    [
     "2026-10-22",
+    1081244
+   ],
+   [
+    "2026-10-23",
     1081244
    ]
   ]
