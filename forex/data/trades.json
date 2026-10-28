@@ -1,6 +1,6 @@
 {
- "generated": "2026-10-27T06:20:08+00:00",
- "date": "2026-10-26",
+ "generated": "2026-10-28T06:53:20+00:00",
+ "date": "2026-10-27",
  "config": {
   "start": "2026-10-20",
   "capital": 1000000,
@@ -20,11 +20,11 @@
   "start": "2026-10-20",
   "capital": 1000000,
   "equity": 1000000,
-  "equityWithOpen": 1000379,
-  "returnPct": 0.00038,
+  "equityWithOpen": 998122,
+  "returnPct": -0.00188,
   "trades": 0,
   "winRate": null,
-  "maxDrawdown": -0.0,
+  "maxDrawdown": -0.00226,
   "open": [
    {
     "pair": "XAU/USD",
@@ -33,10 +33,10 @@
     "entry": 4010.3,
     "stop": 4062.97,
     "target": 3931.31,
-    "last": 4008.31,
+    "last": 4020.19,
     "units": 6,
     "breakeven": false,
-    "unrealized": 379,
+    "unrealized": -1878,
     "why": [
      "下降趨勢（SMA20 在 SMA50 之下）",
      "MACD 柱轉負（動能轉弱）",
@@ -65,6 +65,10 @@
    [
     "2026-10-26",
     1000379
+   ],
+   [
+    "2026-10-27",
+    998122
    ]
   ]
  },
@@ -72,8 +76,8 @@
   "start": "2024-09-30",
   "capital": 1000000,
   "equity": 1081244,
-  "equityWithOpen": 1081654,
-  "returnPct": 0.08165,
+  "equityWithOpen": 1079213,
+  "returnPct": 0.07921,
   "trades": 22,
   "winRate": 0.545,
   "maxDrawdown": -0.09726,
@@ -85,10 +89,10 @@
     "entry": 4010.3,
     "stop": 4062.97,
     "target": 3931.31,
-    "last": 4008.31,
+    "last": 4020.19,
     "units": 6,
     "breakeven": false,
-    "unrealized": 410,
+    "unrealized": -2031,
     "why": [
      "下降趨勢（SMA20 在 SMA50 之下）",
      "MACD 柱轉負（動能轉弱）",
@@ -2544,6 +2548,10 @@
    [
     "2026-10-26",
     1081654
+   ],
+   [
+    "2026-10-27",
+    1079213
    ]
   ]
  }
