@@ -1,6 +1,6 @@
 {
- "generated": "2026-11-11T01:20:37+00:00",
- "date": "2026-11-10",
+ "generated": "2026-11-12T01:21:11+00:00",
+ "date": "2026-11-11",
  "config": {
   "start": "2026-10-20",
   "capital": 1000000,
@@ -19,32 +19,27 @@
  "live": {
   "start": "2026-10-20",
   "capital": 1000000,
-  "equity": 1018922,
-  "equityWithOpen": 1019698,
-  "returnPct": 0.0197,
-  "trades": 1,
+  "equity": 1034163,
+  "equityWithOpen": 1034163,
+  "returnPct": 0.03416,
+  "trades": 2,
   "winRate": 1.0,
   "maxDrawdown": -0.00705,
-  "open": [
+  "open": [],
+  "closed": [
    {
     "pair": "USD/JPY",
     "dir": "買進",
     "openDate": "2026-11-04",
     "entry": 157.949,
-    "stop": 157.949,
-    "target": 158.738,
-    "last": 157.989,
     "units": 93190,
-    "breakeven": true,
-    "unrealized": 777,
-    "why": [
-     "上升趨勢（SMA20 在 SMA50 之上）",
-     "MACD 柱轉正（動能回升）",
-     "RSI 53 未過熱"
-    ]
-   }
-  ],
-  "closed": [
+    "closeDate": "2026-11-11",
+    "exit": 158.799,
+    "reason": "停利",
+    "r": 1.5,
+    "pnl": 15241,
+    "pct": 0.01496
+   },
    {
     "pair": "XAU/USD",
     "dir": "賣出",
@@ -123,38 +118,37 @@
    [
     "2026-11-10",
     1019698
+   ],
+   [
+    "2026-11-11",
+    1034163
    ]
   ]
  },
  "history": {
   "start": "2024-09-30",
   "capital": 1000000,
-  "equity": 1101703,
-  "equityWithOpen": 1102543,
-  "returnPct": 0.10254,
-  "trades": 23,
-  "winRate": 0.565,
+  "equity": 1118183,
+  "equityWithOpen": 1118183,
+  "returnPct": 0.11818,
+  "trades": 24,
+  "winRate": 0.583,
   "maxDrawdown": -0.09726,
-  "open": [
+  "open": [],
+  "closed": [
    {
     "pair": "USD/JPY",
     "dir": "買進",
     "openDate": "2026-11-04",
     "entry": 157.949,
-    "stop": 157.949,
-    "target": 158.738,
-    "last": 157.989,
     "units": 100761,
-    "breakeven": true,
-    "unrealized": 840,
-    "why": [
-     "上升趨勢（SMA20 在 SMA50 之上）",
-     "MACD 柱轉正（動能回升）",
-     "RSI 53 未過熱"
-    ]
-   }
-  ],
-  "closed": [
+    "closeDate": "2026-11-11",
+    "exit": 158.799,
+    "reason": "停利",
+    "r": 1.5,
+    "pnl": 16480,
+    "pct": 0.01496
+   },
    {
     "pair": "XAU/USD",
     "dir": "賣出",
@@ -2659,6 +2653,10 @@
    [
     "2026-11-10",
     1102543
+   ],
+   [
+    "2026-11-11",
+    1118183
    ]
   ]
  }
