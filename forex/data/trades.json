@@ -1,6 +1,6 @@
 {
- "generated": "2026-11-19T01:20:58+00:00",
- "date": "2026-11-18",
+ "generated": "2026-11-20T01:20:39+00:00",
+ "date": "2026-11-19",
  "config": {
   "start": "2026-10-20",
   "capital": 1000000,
@@ -20,8 +20,8 @@
   "start": "2026-10-20",
   "capital": 1000000,
   "equity": 1034163,
-  "equityWithOpen": 1040615,
-  "returnPct": 0.04062,
+  "equityWithOpen": 1045144,
+  "returnPct": 0.04514,
   "trades": 2,
   "winRate": 1.0,
   "maxDrawdown": -0.00705,
@@ -33,10 +33,10 @@
     "entry": 3849.86,
     "stop": 3849.86,
     "target": 3678.94,
-    "last": 3778.77,
+    "last": 3728.87,
     "units": 3,
     "breakeven": true,
-    "unrealized": 6452,
+    "unrealized": 10981,
     "why": [
      "下降趨勢（SMA20 在 SMA50 之下）",
      "MACD 柱轉負（動能轉弱）",
@@ -160,6 +160,10 @@
    [
     "2026-11-18",
     1040615
+   ],
+   [
+    "2026-11-19",
+    1045144
    ]
   ]
  },
@@ -167,8 +171,8 @@
   "start": "2024-09-30",
   "capital": 1000000,
   "equity": 1118183,
-  "equityWithOpen": 1125159,
-  "returnPct": 0.12516,
+  "equityWithOpen": 1130056,
+  "returnPct": 0.13006,
   "trades": 24,
   "winRate": 0.583,
   "maxDrawdown": -0.09726,
@@ -180,10 +184,10 @@
     "entry": 3849.86,
     "stop": 3849.86,
     "target": 3678.94,
-    "last": 3778.77,
+    "last": 3728.87,
     "units": 3,
     "breakeven": true,
-    "unrealized": 6976,
+    "unrealized": 11873,
     "why": [
      "下降趨勢（SMA20 在 SMA50 之下）",
      "MACD 柱轉負（動能轉弱）",
@@ -2733,6 +2737,10 @@
    [
     "2026-11-18",
     1125159
+   ],
+   [
+    "2026-11-19",
+    1130056
    ]
   ]
  }
